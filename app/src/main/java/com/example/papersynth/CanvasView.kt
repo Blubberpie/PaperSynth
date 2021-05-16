@@ -39,19 +39,21 @@ class CanvasView(context: Context) : View(context) {
         strokeWidth = STROKE_WIDTH // default: Hairline-width (really thin)
     }
 
-    private var path = Path()
+    private val drawing = Path() // the drawing so far
+    private val curPath = Path() // current drawing
 
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
         super.onSizeChanged(width, height, oldWidth, oldHeight)
         if (::extraBitmap.isInitialized) extraBitmap.recycle()
         extraBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         extraCanvas = Canvas(extraBitmap)
-        extraCanvas.drawColor(backgroundColor)
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawBitmap(extraBitmap, 0f, 0f, null)
+        canvas.drawColor(backgroundColor) // TODO is this bad code??
+        canvas.drawPath(drawing, brush)
+        canvas.drawPath(curPath, brush)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -68,8 +70,8 @@ class CanvasView(context: Context) : View(context) {
     }
 
     private fun touchStart() {
-        path.reset()
-        path.moveTo(motionTouchEventX, motionTouchEventY)
+        curPath.reset()
+        curPath.moveTo(motionTouchEventX, motionTouchEventY)
         currentX = motionTouchEventX
         currentY = motionTouchEventY
     }
@@ -78,7 +80,7 @@ class CanvasView(context: Context) : View(context) {
         val dx = abs(motionTouchEventX - currentX)
         val dy = abs(motionTouchEventY - currentY)
         if (dx >= touchTolerance || dy >= touchTolerance) {
-            path.quadTo( // quadratic bezier from pt1 to pt2
+            curPath.quadTo( // quadratic bezier from pt1 to pt2
                 currentX,
                 currentY,
                 (motionTouchEventX + currentX) / 2,
@@ -86,12 +88,13 @@ class CanvasView(context: Context) : View(context) {
             )
             currentX = motionTouchEventX
             currentY = motionTouchEventY
-            extraCanvas.drawPath(path, brush) // cache it
+            extraCanvas.drawPath(curPath, brush) // cache it
         }
         invalidate() // force redraw screen with updated path
     }
 
     private fun touchUp() {
-        path.reset() // prevent from drawing again
+        drawing.addPath(curPath)
+        curPath.reset()
     }
 }
