@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">PaperSynth</string>
+    <string name="canvasContentDescription">Drag your fingers to draw.</string>
 </resources>
