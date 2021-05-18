@@ -6,19 +6,18 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
+import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-//import android.view.ViewConfiguration
 import androidx.core.content.res.ResourcesCompat
 import kotlin.math.abs
 
 private const val STROKE_WIDTH = 12f
 
-class CanvasView(context: Context) : View(context) {
+class CanvasView : View {
     private lateinit var extraCanvas: Canvas
     private lateinit var extraBitmap: Bitmap
 
-    private val backgroundColor = ResourcesCompat.getColor(resources, R.color.canvasD, null)
     private val brushColor = ResourcesCompat.getColor(resources, R.color.brushL, null)
     private var motionTouchEventX = 0f
     private var motionTouchEventY = 0f
@@ -36,11 +35,15 @@ class CanvasView(context: Context) : View(context) {
         style = Paint.Style.STROKE // default: FILL
         strokeJoin = Paint.Join.ROUND // default: MITER
         strokeCap = Paint.Cap.ROUND // default: BUTT
-        strokeWidth = STROKE_WIDTH // default: Hairline-width (really thin)
+        strokeWidth = STROKE_WIDTH
     }
 
     private val drawing = Path() // the drawing so far
     private val curPath = Path() // current drawing
+
+    constructor(context: Context) : this(context, null)
+    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
         super.onSizeChanged(width, height, oldWidth, oldHeight)
@@ -51,7 +54,6 @@ class CanvasView(context: Context) : View(context) {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawColor(backgroundColor) // TODO is this bad code??
         canvas.drawPath(drawing, brush)
         canvas.drawPath(curPath, brush)
     }

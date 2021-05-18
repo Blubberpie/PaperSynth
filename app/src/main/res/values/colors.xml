@@ -10,8 +10,9 @@
 
     <!-- Dark Mode Colors -->
 
-    <color name="mainD">#555770</color>
-    <color name="canvasD">#1C1C28</color>
+    <color name="mainD">#1C1C28</color>
+    <color name="canvasD">#393954</color>
+    <color name="elementD">#8F90A6</color>
     <color name="textL">#EBEBF0</color>
     <color name="brushL">#F2F2F5</color>
 
