@@ -2,10 +2,7 @@ package com.example.papersynth
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Path
+import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -15,8 +12,8 @@ import kotlin.math.abs
 private const val STROKE_WIDTH = 12f
 
 class CanvasView : View {
-    private lateinit var extraCanvas: Canvas
-    private lateinit var extraBitmap: Bitmap
+    private lateinit var canvas: Canvas
+    private lateinit var bitmap: Bitmap
 
     private val brushColor = ResourcesCompat.getColor(resources, R.color.brushL, null)
     private var motionTouchEventX = 0f
@@ -47,9 +44,9 @@ class CanvasView : View {
 
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
         super.onSizeChanged(width, height, oldWidth, oldHeight)
-        if (::extraBitmap.isInitialized) extraBitmap.recycle()
-        extraBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        extraCanvas = Canvas(extraBitmap)
+        if (::bitmap.isInitialized) bitmap.recycle()
+        bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        canvas = Canvas(bitmap)
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -71,6 +68,8 @@ class CanvasView : View {
         return true
     }
 
+    // PRIVATE
+
     private fun touchStart() {
         curPath.reset()
         curPath.moveTo(motionTouchEventX, motionTouchEventY)
@@ -90,7 +89,7 @@ class CanvasView : View {
             )
             currentX = motionTouchEventX
             currentY = motionTouchEventY
-            extraCanvas.drawPath(curPath, brush) // cache it
+            canvas.drawPath(curPath, brush) // cache it
         }
         invalidate() // force redraw screen with updated path
     }
@@ -98,5 +97,13 @@ class CanvasView : View {
     private fun touchUp() {
         drawing.addPath(curPath)
         curPath.reset()
+    }
+
+    // PUBLIC
+
+    fun getBitmap(): Bitmap {
+        this.setBackgroundColor(Color.TRANSPARENT)
+        draw(canvas)
+        return bitmap
     }
 }
