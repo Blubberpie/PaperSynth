@@ -21,7 +21,7 @@ class CanvasView : View {
     private var currentX = 0f
     private var currentY = 0f
 
-    // 28 pixels on Galaxy Note 5
+    /* 28 pixels on Galaxy Note 5 */
 //    private val touchTolerance = ViewConfiguration.get(context).scaledTouchSlop
     private val touchTolerance = 8f // make it smoother
 

@@ -1,8 +1,6 @@
 package com.example.papersynth
 
 import android.Manifest
-import android.app.Activity
-import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Environment
@@ -20,6 +18,7 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
 
     private lateinit var canvasView: CanvasView
 
+    @Override
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -28,15 +27,16 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
         val view = inflater.inflate(R.layout.fragment_canvas, container, false)
         canvasView = view.findViewById(R.id.canvas_view)
 
-        val testButton = activity?.findViewById<Button>(R.id.test_button)
+        val testButton = activity?.findViewById<Button>(R.id.btn_test)
         testButton?.setOnClickListener(this)
 
         return view
     }
 
+    @Override
     override fun onClick(v: View?) {
         when (v?.id) {
-            R.id.test_button -> {
+            R.id.btn_test -> {
                 val bitmap = canvasView.getBitmap()
                 activity?.let { fragmentActivity ->
                     ActivityCompat.requestPermissions(fragmentActivity, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
