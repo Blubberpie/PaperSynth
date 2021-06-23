@@ -18,8 +18,8 @@ PaperSynthSoundGenerator::PaperSynthSoundGenerator(int32_t sampleRate, int32_t c
         oscillators_.push_back(osc);
         mixer_.addTrack(osc);
         curFrequency = curFrequency * INTERVAL;
-        if (curFrequency >= 16000) {
-            curFrequency = 50.0;
+        if (curFrequency >= 16744.036179238312619382) {
+            curFrequency = 55.0;
         }
     }
 

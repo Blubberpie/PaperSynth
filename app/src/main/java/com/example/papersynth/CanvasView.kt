@@ -4,18 +4,24 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.alpha
+import java.lang.StringBuilder
 import kotlin.math.abs
+
 
 private const val STROKE_WIDTH = 12f
 
 class CanvasView : View {
-    private lateinit var canvas: Canvas
-    private lateinit var bitmap: Bitmap
+    private lateinit var mainCanvas: Canvas
+    private lateinit var mainBitmap: Bitmap
 
     private val brushColor = ResourcesCompat.getColor(resources, R.color.brushL, null)
+    private val resizedWidth = 335 // todo: this is really bad coding lol
+    private val resizedHeight = 108
     private var motionTouchEventX = 0f
     private var motionTouchEventY = 0f
     private var currentX = 0f
@@ -44,9 +50,9 @@ class CanvasView : View {
 
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
         super.onSizeChanged(width, height, oldWidth, oldHeight)
-        if (::bitmap.isInitialized) bitmap.recycle()
-        bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        canvas = Canvas(bitmap)
+        if (::mainBitmap.isInitialized) mainBitmap.recycle()
+        mainBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        mainCanvas = Canvas(mainBitmap)
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -89,7 +95,7 @@ class CanvasView : View {
             )
             currentX = motionTouchEventX
             currentY = motionTouchEventY
-            canvas.drawPath(curPath, brush) // cache it
+            mainCanvas.drawPath(curPath, brush) // cache it
         }
         invalidate() // force redraw screen with updated path
     }
@@ -99,11 +105,50 @@ class CanvasView : View {
         curPath.reset()
     }
 
+    private fun getResizedBitmap(bm: Bitmap): Bitmap {
+        val width = bm.width
+        val height = bm.height
+        val scaleWidth = resizedWidth.toFloat() / width
+        val scaleHeight = resizedHeight.toFloat() / height
+
+        val matrix = Matrix()
+        matrix.postScale(scaleWidth, scaleHeight)
+
+        val resizedBitmap = Bitmap.createBitmap(
+            bm, 0, 0, width, height, matrix, false
+        )
+
+        bm.recycle()
+        return resizedBitmap
+    }
+
+    private fun getAlphaArray(bm: Bitmap): IntArray {
+        val w = bm.width
+        val h = bm.height
+
+        val pixels = IntArray(resizedWidth * resizedHeight)
+        bm.getPixels(pixels, 0, w, 0, 0, w, h)
+        for (row in 0 until h) {
+            for (col in 0 until w) {
+                val pos = row * w + col
+                if (Color.alpha(pixels[pos]) > 0) {
+                    pixels[pos] = pixels[pos].alpha
+                } else {
+                    pixels[pos] = 0
+                }
+            }
+        }
+
+        return pixels
+    }
+
     // PUBLIC
 
     fun getBitmap(): Bitmap {
         this.setBackgroundColor(Color.TRANSPARENT)
-        draw(canvas)
-        return bitmap
+        draw(mainCanvas)
+        val resizedBitmap = getResizedBitmap(mainBitmap)
+        getAlphaArray(resizedBitmap)
+        return resizedBitmap
     }
 }
