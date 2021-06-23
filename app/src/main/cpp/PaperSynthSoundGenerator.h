@@ -6,13 +6,18 @@
 #define PAPERSYNTH_PAPERSYNTHSOUNDGENERATOR_H
 
 #include "PaperSynthOscillator.h"
+#include "PaperSynthMixer.h"
+
+#include <oboe/Oboe.h>
 #include <TappableAudioSource.h>
+#include <MonoToStereo.h>
 #include <chrono>
+#include <vector>
 
 using std::chrono::high_resolution_clock;
 using std::chrono::duration;
 
-const double TWELFTH_ROOT_TWO = pow(2, 1.0/12); // semitone
+const double INTERVAL = pow(2, 7.0/12); // semitone
 
 class PaperSynthSoundGenerator : public TappableAudioSource {
     static constexpr size_t SHARED_BUFFER_SIZE = 1024;
@@ -40,14 +45,18 @@ public:
     void renderAudio(float *audioData, int32_t numFrames) override;
 
 private:
-    std::unique_ptr<PaperSynthOscillator[]> oscillators_;
-    std::unique_ptr<float[]> buffer_ = std::make_unique<float[]>(SHARED_BUFFER_SIZE);
-    double cur_frequency_ = FREQUENCY_DEFAULT;
-    int pitchChangeDelay_ = 1000; // ms
-    high_resolution_clock::time_point lastPitchChangeTime_;
-    bool waveIsOn_ = false;
+    std::vector<PaperSynthOscillator*> oscillators_;
+    PaperSynthMixer mixer_;
+    MonoToStereo converter_ = MonoToStereo(&mixer_);
+    IRenderableAudio *outputStage_; // This will point to either the mixer or converter, so it needs to be raw
 
-    void addSemitoneAbove();
+//    bool waveIsOn_ = false;
+    int numOscs_ = 108;
+
+//    high_resolution_clock::time_point lastPitchChangeTime_;
+    double curFrequency = FREQUENCY_DEFAULT;
+//    int pitchChangeDelay_ = 1000; // ms
+//    void addSemitoneAbove();
 };
 
 

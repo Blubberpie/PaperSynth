@@ -30,6 +30,7 @@ set (
         PaperSynthSoundGenerator.cpp
         PaperSynthLatencyTuningCallback.cpp
         PaperSynthEngine.cpp
+        PaperSynthMixer.cpp
 )
 
 # Creates and names a library, sets it as either STATIC
