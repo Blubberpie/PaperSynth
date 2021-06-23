@@ -15,9 +15,7 @@ import com.example.papersynth.PlaybackEngine.start
 import com.example.papersynth.PlaybackEngine.stop
 
 
-class MainActivity : AppCompatActivity(), View.OnClickListener {
-
-    private var isOn: Boolean = false
+class MainActivity : AppCompatActivity() {
 
     @Override
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,11 +43,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             .beginTransaction()
             .add(R.id.fragment_container_view, CanvasFragment())
             .commit()
-
-        val testButton = findViewById<Button>(R.id.btn_test)
-        testButton.setOnClickListener(this)
-        val waveButton = findViewById<Button>(R.id.btn_play_wave)
-        waveButton.setOnClickListener(this)
     }
 
     /*
@@ -75,15 +68,5 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
         delete()
         super.onPause()
-    }
-
-    @Override
-    override fun onClick(v: View?) {
-        when (v?.id) {
-            R.id.btn_play_wave -> {
-                this.isOn = !isOn
-                setToneOn(isOn)
-            }
-        }
     }
 }

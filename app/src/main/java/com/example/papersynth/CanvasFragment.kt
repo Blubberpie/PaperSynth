@@ -18,6 +18,8 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
 
     private lateinit var canvasView: CanvasView
 
+    private var isOn: Boolean = false
+
     @Override
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -27,8 +29,7 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
         val view = inflater.inflate(R.layout.fragment_canvas, container, false)
         canvasView = view.findViewById(R.id.canvas_view)
 
-        val testButton = activity?.findViewById<Button>(R.id.btn_test)
-        testButton?.setOnClickListener(this)
+        initializeButtons()
 
         return view
     }
@@ -53,6 +54,17 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
                     }
                 }
             }
+            R.id.btn_play_wave -> {
+                this.isOn = !isOn
+                PlaybackEngine.setToneOn(isOn)
+            }
         }
+    }
+
+    private fun initializeButtons() {
+        val testButton = activity?.findViewById<Button>(R.id.btn_test)
+        testButton?.setOnClickListener(this)
+        val waveButton = activity?.findViewById<Button>(R.id.btn_play_wave)
+        waveButton?.setOnClickListener(this)
     }
 }
