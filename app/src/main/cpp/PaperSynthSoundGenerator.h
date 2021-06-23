@@ -17,7 +17,8 @@
 using std::chrono::high_resolution_clock;
 using std::chrono::duration;
 
-const double INTERVAL = pow(2, 7.0/12); // semitone
+//const double INTERVAL_PERFECT_FIFTH = pow(2, 7.0/12);
+const double INTERVAL_SEMITONE = pow(2, 1.0/12);
 
 class PaperSynthSoundGenerator : public TappableAudioSource {
     static constexpr size_t SHARED_BUFFER_SIZE = 1024;
@@ -65,10 +66,10 @@ private:
     high_resolution_clock::time_point lastSweepTime_;
     bool waveIsOn_ = false;
     double curFrequency = FREQUENCY_DEFAULT;
-    int sweepDelay_ = 100; // ms
+    int sweepDelay_ = 30; // ms
     int curSweepPosition_ = 0;
 
-    void processAlphaArray();
+    void processAlphaArray(bool disableAll=false);
 };
 
 
