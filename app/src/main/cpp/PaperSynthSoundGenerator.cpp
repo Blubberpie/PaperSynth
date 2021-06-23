@@ -57,9 +57,10 @@ void PaperSynthSoundGenerator::tap(bool isOn) {
 }
 
 void PaperSynthSoundGenerator::processAlphaArray() {
-    for (int row = 0; row < alphaArrayHeight_; ++row) {
+    // Loop by column
+    for (int col = 0; col < alphaArrayWidth_; ++col) {
         std::string p;
-        for (int col = 0; col < alphaArrayWidth_; ++col) {
+        for (int row = 0; row < alphaArrayHeight_; ++row) {
             int pos = row * alphaArrayWidth_ + col;
             if (alphaArray_[pos] > 0) {
                 p += "1";
