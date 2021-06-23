@@ -59,7 +59,6 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
                 if (this.isOn) {
                     val alphaArray = canvasView.getAlphaArray()
                     PlaybackEngine.setAlphaArray(alphaArray)
-                    PlaybackEngine.processAlphaArray()
                 }
                 PlaybackEngine.setToneOn(this.isOn)
             }

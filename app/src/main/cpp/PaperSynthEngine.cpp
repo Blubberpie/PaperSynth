@@ -174,9 +174,3 @@ void PaperSynthEngine::setAudioSourceAlphaArray(std::vector<int> alphaArray, int
         audioSource_->setAlphaArrayDimensions(width, height);
     }
 }
-
-void PaperSynthEngine::processAlphaArray() {
-    if (audioSource_) {
-        audioSource_->processAlphaArray();
-    }
-}

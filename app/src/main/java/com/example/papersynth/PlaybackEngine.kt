@@ -63,10 +63,6 @@ object PlaybackEngine {
         )
     }
 
-    fun processAlphaArray() {
-        if (mEngineHandle != 0L) nativeProcessAlphaArray(mEngineHandle)
-    }
-
     fun setAudioApi(audioApi: Int) {
         if (mEngineHandle != 0L) nativeSetAudioApi(mEngineHandle, audioApi)
     }
@@ -93,7 +89,6 @@ object PlaybackEngine {
     private external fun nativeStartEngine(engineHandle: Long): Int
     private external fun nativeStopEngine(engineHandle: Long): Int
     private external fun nativeDeleteEngine(engineHandle: Long)
-    private external fun nativeProcessAlphaArray(engineHandle: Long)
 
     private external fun nativeSetToneOn(engineHandle: Long, isToneOn: Boolean)
     private external fun nativeSetAudioApi(engineHandle: Long, audioApi: Int)

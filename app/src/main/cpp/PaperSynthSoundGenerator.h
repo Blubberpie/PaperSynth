@@ -43,7 +43,7 @@ public:
     void tap(bool isOn) override;
 
     void renderAudio(float *audioData, int32_t numFrames) override;
-    void processAlphaArray();
+
     void setAlphaArray(std::vector<int> alphaArray) { alphaArray_ = alphaArray; }
     void setAlphaArrayDimensions(int width, int height) {
         alphaArrayWidth_ = width;
@@ -56,17 +56,19 @@ private:
     MonoToStereo converter_ = MonoToStereo(&mixer_);
     IRenderableAudio *outputStage_; // This will point to either the mixer or converter, so it needs to be raw
 
-    std::vector<int> alphaArray_;
-    int alphaArrayWidth_;
-    int alphaArrayHeight_;
-
-//    bool waveIsOn_ = false;
     int numOscs_ = 108;
 
-//    high_resolution_clock::time_point lastPitchChangeTime_;
+    std::vector<int> alphaArray_;
+    int alphaArrayWidth_ = 0;
+    int alphaArrayHeight_ = 0;
+
+    high_resolution_clock::time_point lastSweepTime_;
+    bool waveIsOn_ = false;
     double curFrequency = FREQUENCY_DEFAULT;
-//    int pitchChangeDelay_ = 1000; // ms
-//    void addSemitoneAbove();
+    int sweepDelay_ = 100; // ms
+    int curSweepPosition_ = 0;
+
+    void processAlphaArray();
 };
 
 

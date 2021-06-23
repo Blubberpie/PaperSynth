@@ -17,9 +17,9 @@ PaperSynthSoundGenerator::PaperSynthSoundGenerator(int32_t sampleRate, int32_t c
         osc->setAmplitude(amplitude);
         oscillators_.push_back(osc);
         mixer_.addTrack(osc);
-        curFrequency = curFrequency * INTERVAL;
-        if (curFrequency >= 16744.036179238312619382) {
-            curFrequency = 55.0;
+        curFrequency = curFrequency / INTERVAL;
+        if (curFrequency <= 55.0) {
+            curFrequency = 16744.036179238312619382;
         }
     }
 
@@ -49,29 +49,31 @@ void PaperSynthSoundGenerator::renderAudio(float *audioData, int32_t numFrames) 
 //        changePitch = false;
 //    }
 
+    high_resolution_clock::time_point curTime = high_resolution_clock::now();
+    duration<double, std::milli> timeSinceLastSweep = curTime - lastSweepTime_;
+    bool shouldSweep = timeSinceLastSweep.count() >= sweepDelay_;
+
+    if (waveIsOn_ && shouldSweep) {
+        processAlphaArray();
+        curSweepPosition_ = (curSweepPosition_ == alphaArrayWidth_ - 1) ? 0 : curSweepPosition_ + 1;
+        lastSweepTime_ = curTime;
+    }
+
     outputStage_->renderAudio(audioData, numFrames);
 }
 
 void PaperSynthSoundGenerator::tap(bool isOn) {
-    for (auto &osc : oscillators_) osc->setWaveOn(isOn);
+    waveIsOn_ = isOn;
+    if (!isOn) curSweepPosition_ = 0;
 }
 
 void PaperSynthSoundGenerator::processAlphaArray() {
-    // Loop by column
-    for (int col = 0; col < alphaArrayWidth_; ++col) {
-        std::string p;
-        for (int row = 0; row < alphaArrayHeight_; ++row) {
-            int pos = row * alphaArrayWidth_ + col;
-            if (alphaArray_[pos] > 0) {
-                p += "1";
-            } else {
-                p += "0";
-            }
+    for (int row = 0; row < alphaArrayHeight_; ++row) {
+        int pos = row * alphaArrayWidth_ + curSweepPosition_;
+        if (alphaArray_[pos] > 0) {
+            oscillators_[row]->setWaveOn(waveIsOn_);
+        } else {
+            oscillators_[row]->setWaveOn(false);
         }
-        LOGD("%s", p.c_str());
     }
 }
-
-//void PaperSynthSoundGenerator::addSemitoneAbove() {
-//    curFrequency = (curFrequency >= 20000) ? FREQUENCY_DEFAULT : curFrequency * TWELFTH_ROOT_TWO;
-//}

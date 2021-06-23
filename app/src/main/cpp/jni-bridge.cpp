@@ -204,18 +204,4 @@ Java_com_example_papersynth_PlaybackEngine_nativeSetAlphaArray(
     }
 }
 
-JNIEXPORT void JNICALL
-Java_com_example_papersynth_PlaybackEngine_nativeProcessAlphaArray(
-        JNIEnv *env,
-        jobject type,
-        jlong engineHandle) {
-
-    auto *engine = reinterpret_cast<PaperSynthEngine*>(engineHandle);
-    if (engine) {
-        engine->processAlphaArray();
-    } else {
-        LOGE("Engine handle is invalid, call createEngine() to create a new one");
-    }
-}
-
 }
