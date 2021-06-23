@@ -56,6 +56,21 @@ void PaperSynthSoundGenerator::tap(bool isOn) {
     for (auto &osc : oscillators_) osc->setWaveOn(isOn);
 }
 
+void PaperSynthSoundGenerator::processAlphaArray() {
+    for (int row = 0; row < alphaArrayHeight_; ++row) {
+        std::string p;
+        for (int col = 0; col < alphaArrayWidth_; ++col) {
+            int pos = row * alphaArrayWidth_ + col;
+            if (alphaArray_[pos] > 0) {
+                p += "1";
+            } else {
+                p += "0";
+            }
+        }
+        LOGD("%s", p.c_str());
+    }
+}
+
 //void PaperSynthSoundGenerator::addSemitoneAbove() {
 //    curFrequency = (curFrequency >= 20000) ? FREQUENCY_DEFAULT : curFrequency * TWELFTH_ROOT_TWO;
 //}

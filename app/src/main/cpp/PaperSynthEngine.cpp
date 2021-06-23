@@ -5,6 +5,7 @@
 #include <android/log.h>
 #include <cinttypes>
 #include <memory>
+#include <utility>
 
 #include "PaperSynthEngine.h"
 #include "PaperSynthOscillator.h"
@@ -137,7 +138,7 @@ double PaperSynthEngine::getCurrentOutputLatencyMillis() {
     return outputLatencyMillis;
 }
 
-bool PaperSynthEngine::isLatencyDetectionSupported() {
+bool PaperSynthEngine::isLatencyDetectionSupported() const {
     return isLatencyDetectionSupported_;
 }
 
@@ -165,4 +166,17 @@ oboe::Result PaperSynthEngine::openPlaybackStream() {
         channelCount_ = stream_->getChannelCount();
     }
     return result;
+}
+
+void PaperSynthEngine::setAudioSourceAlphaArray(std::vector<int> alphaArray, int width, int height) {
+    if (audioSource_) {
+        audioSource_->setAlphaArray(std::move(alphaArray));
+        audioSource_->setAlphaArrayDimensions(width, height);
+    }
+}
+
+void PaperSynthEngine::processAlphaArray() {
+    if (audioSource_) {
+        audioSource_->processAlphaArray();
+    }
 }

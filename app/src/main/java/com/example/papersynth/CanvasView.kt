@@ -4,12 +4,11 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.alpha
-import java.lang.StringBuilder
+import com.example.papersynth.dataclasses.AlphaArray
 import kotlin.math.abs
 
 
@@ -114,23 +113,20 @@ class CanvasView : View {
         val matrix = Matrix()
         matrix.postScale(scaleWidth, scaleHeight)
 
-        val resizedBitmap = Bitmap.createBitmap(
+        return Bitmap.createBitmap(
             bm, 0, 0, width, height, matrix, false
         )
-
-        bm.recycle()
-        return resizedBitmap
     }
 
-    private fun getAlphaArray(bm: Bitmap): IntArray {
-        val w = bm.width
-        val h = bm.height
-
+    /**
+     * TODO: description
+     */
+    private fun convertToAlphaArray(bm: Bitmap): IntArray {
         val pixels = IntArray(resizedWidth * resizedHeight)
-        bm.getPixels(pixels, 0, w, 0, 0, w, h)
-        for (row in 0 until h) {
-            for (col in 0 until w) {
-                val pos = row * w + col
+        bm.getPixels(pixels, 0, resizedWidth, 0, 0, resizedWidth, resizedHeight)
+        for (row in 0 until resizedHeight) {
+            for (col in 0 until resizedWidth) {
+                val pos = row * resizedWidth + col
                 if (Color.alpha(pixels[pos]) > 0) {
                     pixels[pos] = pixels[pos].alpha
                 } else {
@@ -148,7 +144,18 @@ class CanvasView : View {
         this.setBackgroundColor(Color.TRANSPARENT)
         draw(mainCanvas)
         val resizedBitmap = getResizedBitmap(mainBitmap)
-        getAlphaArray(resizedBitmap)
+        convertToAlphaArray(resizedBitmap)
         return resizedBitmap
+    }
+
+    // TODO: some mechanism to detect if bitmap has changed so that PSE doesn't have to process again
+    fun getAlphaArray(): AlphaArray {
+        this.setBackgroundColor(Color.TRANSPARENT)
+        draw(mainCanvas)
+        val resizedBitmap = getResizedBitmap(mainBitmap)
+        return AlphaArray(
+            convertToAlphaArray(resizedBitmap),
+            resizedWidth,
+            resizedHeight)
     }
 }

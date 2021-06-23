@@ -43,12 +43,22 @@ public:
     void tap(bool isOn) override;
 
     void renderAudio(float *audioData, int32_t numFrames) override;
+    void processAlphaArray();
+    void setAlphaArray(std::vector<int> alphaArray) { alphaArray_ = alphaArray; }
+    void setAlphaArrayDimensions(int width, int height) {
+        alphaArrayWidth_ = width;
+        alphaArrayHeight_ = height;
+    }
 
 private:
     std::vector<PaperSynthOscillator*> oscillators_;
     PaperSynthMixer mixer_;
     MonoToStereo converter_ = MonoToStereo(&mixer_);
     IRenderableAudio *outputStage_; // This will point to either the mixer or converter, so it needs to be raw
+
+    std::vector<int> alphaArray_;
+    int alphaArrayWidth_;
+    int alphaArrayHeight_;
 
 //    bool waveIsOn_ = false;
     int numOscs_ = 108;

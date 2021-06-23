@@ -5,6 +5,18 @@
 #include "PaperSynthEngine.h"
 #include <logging_macros.h>
 
+std::vector<int> convertJavaArrayToVector(JNIEnv *env, jintArray intArray) {
+    std::vector<int> v;
+    jsize length = env->GetArrayLength(intArray);
+    if (length > 0) {
+        jint *elements = env->GetIntArrayElements(intArray, nullptr);
+        v.insert(v.end(), &elements[0], &elements[length]);
+        // Unpin the memory for the array, or free the copy.
+        env->ReleaseIntArrayElements(intArray, elements, 0);
+    }
+    return v;
+}
+
 extern "C" {
 
 /**
@@ -171,6 +183,39 @@ Java_com_example_papersynth_PlaybackEngine_nativeSetDefaultStreamValues(
         jint framesPerBurst) {
     oboe::DefaultStreamValues::SampleRate = (int32_t) sampleRate;
     oboe::DefaultStreamValues::FramesPerBurst = (int32_t) framesPerBurst;
+}
+
+JNIEXPORT void JNICALL
+Java_com_example_papersynth_PlaybackEngine_nativeSetAlphaArray(
+        JNIEnv *env,
+        jobject type,
+        jlong engineHandle,
+        jintArray jAlphaArray,
+        jint jWidth,
+        jint jHeight) {
+
+    std::vector<int> alphaArray = convertJavaArrayToVector(env, jAlphaArray);
+
+    auto *engine = reinterpret_cast<PaperSynthEngine*>(engineHandle);
+    if (engine) {
+        engine->setAudioSourceAlphaArray(alphaArray, jWidth, jHeight);
+    } else {
+        LOGE("Engine handle is invalid, call createEngine() to create a new one");
+    }
+}
+
+JNIEXPORT void JNICALL
+Java_com_example_papersynth_PlaybackEngine_nativeProcessAlphaArray(
+        JNIEnv *env,
+        jobject type,
+        jlong engineHandle) {
+
+    auto *engine = reinterpret_cast<PaperSynthEngine*>(engineHandle);
+    if (engine) {
+        engine->processAlphaArray();
+    } else {
+        LOGE("Engine handle is invalid, call createEngine() to create a new one");
+    }
 }
 
 }
