@@ -37,22 +37,8 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
     @Override
     override fun onClick(v: View?) {
         when (v?.id) {
-            R.id.btn_test -> {
-                val bitmap = canvasView.getBitmap()
-                activity?.let { fragmentActivity ->
-                    ActivityCompat.requestPermissions(fragmentActivity, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
-
-                    val filename = "test.png"
-                    val file = File(fragmentActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "PaperSynth")
-
-                    if (!file.mkdirs()) {
-                        Log.e("Directory error", "Directory not created")
-                    }
-
-                    FileOutputStream(File(file, filename)).use { fos ->
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
-                    }
-                }
+            R.id.btn_clear -> {
+                canvasView.clearCanvas()
             }
             R.id.btn_play_wave -> {
                 this.isOn = !this.isOn
@@ -62,12 +48,29 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
                 }
                 PlaybackEngine.setToneOn(this.isOn)
             }
+//            R.id.btn_clear -> { // Save bitmap
+//                val bitmap = canvasView.getBitmap()
+//                activity?.let { fragmentActivity ->
+//                    ActivityCompat.requestPermissions(fragmentActivity, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
+//
+//                    val filename = "test.png"
+//                    val file = File(fragmentActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "PaperSynth")
+//
+//                    if (!file.mkdirs()) {
+//                        Log.e("Directory error", "Directory not created")
+//                    }
+//
+//                    FileOutputStream(File(file, filename)).use { fos ->
+//                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+//                    }
+//                }
+//            }
         }
     }
 
     private fun initializeButtons() {
-        val testButton = activity?.findViewById<Button>(R.id.btn_test)
-        testButton?.setOnClickListener(this)
+        val clearButton = activity?.findViewById<Button>(R.id.btn_clear)
+        clearButton?.setOnClickListener(this)
         val waveButton = activity?.findViewById<Button>(R.id.btn_play_wave)
         waveButton?.setOnClickListener(this)
     }

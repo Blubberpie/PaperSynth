@@ -17,7 +17,10 @@
 using std::chrono::high_resolution_clock;
 using std::chrono::duration;
 
-//const double INTERVAL_PERFECT_FIFTH = pow(2, 7.0/12);
+const double MAXIMUM_FREQUENCY = 16744.036179238312619382; // very high D
+const double MINIMUM_FREQUENCY = 55.0; // very low A
+
+const double INTERVAL_PERFECT_FIFTH = pow(2, 7.0/12);
 const double INTERVAL_SEMITONE = pow(2, 1.0/12);
 
 class PaperSynthSoundGenerator : public TappableAudioSource {
@@ -65,7 +68,7 @@ private:
 
     high_resolution_clock::time_point lastSweepTime_;
     bool waveIsOn_ = false;
-    double curFrequency = FREQUENCY_DEFAULT;
+    double curFrequency = MAXIMUM_FREQUENCY;
     int sweepDelay_ = 30; // ms
     int curSweepPosition_ = 0;
 

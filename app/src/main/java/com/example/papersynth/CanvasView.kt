@@ -158,4 +158,11 @@ class CanvasView : View {
             resizedWidth,
             resizedHeight)
     }
+
+    fun clearCanvas() {
+        drawing.reset()
+        curPath.reset()
+        mainCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+        invalidate()
+    }
 }
