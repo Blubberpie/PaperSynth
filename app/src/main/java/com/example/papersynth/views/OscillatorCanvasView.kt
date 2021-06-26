@@ -2,19 +2,21 @@ package com.example.papersynth.views
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Path
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.alpha
 import com.example.papersynth.R
-import com.example.papersynth.dataclasses.AlphaArray
 import kotlin.math.abs
 
 private const val STROKE_WIDTH = 12f
 
-class CanvasView : View {
+class OscillatorCanvasView : View {
+
     private lateinit var mainCanvas: Canvas
     private lateinit var mainBitmap: Bitmap
 
@@ -104,65 +106,4 @@ class CanvasView : View {
         curPath.reset()
     }
 
-    private fun getResizedBitmap(bm: Bitmap): Bitmap {
-        val width = bm.width
-        val height = bm.height
-        val scaleWidth = resizedWidth.toFloat() / width
-        val scaleHeight = resizedHeight.toFloat() / height
-
-        val matrix = Matrix()
-        matrix.postScale(scaleWidth, scaleHeight)
-
-        return Bitmap.createBitmap(
-            bm, 0, 0, width, height, matrix, false
-        )
-    }
-
-    /**
-     * TODO: description
-     */
-    private fun convertToAlphaArray(bm: Bitmap): IntArray {
-        val pixels = IntArray(resizedWidth * resizedHeight)
-        bm.getPixels(pixels, 0, resizedWidth, 0, 0, resizedWidth, resizedHeight)
-        for (row in 0 until resizedHeight) {
-            for (col in 0 until resizedWidth) {
-                val pos = row * resizedWidth + col
-                if (Color.alpha(pixels[pos]) > 0) {
-                    pixels[pos] = pixels[pos].alpha
-                } else {
-                    pixels[pos] = 0
-                }
-            }
-        }
-
-        return pixels
-    }
-
-    // PUBLIC
-
-    fun getBitmap(): Bitmap {
-        this.setBackgroundColor(Color.TRANSPARENT)
-        draw(mainCanvas)
-        val resizedBitmap = getResizedBitmap(mainBitmap)
-        convertToAlphaArray(resizedBitmap)
-        return resizedBitmap
-    }
-
-    // TODO: some mechanism to detect if bitmap has changed so that PSE doesn't have to process again
-    fun getAlphaArray(): AlphaArray {
-        this.setBackgroundColor(Color.TRANSPARENT)
-        draw(mainCanvas)
-        val resizedBitmap = getResizedBitmap(mainBitmap)
-        return AlphaArray(
-            convertToAlphaArray(resizedBitmap),
-            resizedWidth,
-            resizedHeight)
-    }
-
-    fun clearCanvas() {
-        drawing.reset()
-        curPath.reset()
-        mainCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
-        invalidate()
-    }
 }

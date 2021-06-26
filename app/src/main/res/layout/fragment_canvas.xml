@@ -5,9 +5,9 @@
     android:id="@+id/canvas_fragment_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".CanvasFragment">
+    tools:context=".fragments.CanvasFragment">
 
-    <com.example.papersynth.CanvasView
+    <com.example.papersynth.views.CanvasView
         android:id="@+id/canvas_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

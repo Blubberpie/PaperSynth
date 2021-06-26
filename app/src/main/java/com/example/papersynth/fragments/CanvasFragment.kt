@@ -1,4 +1,4 @@
-package com.example.papersynth.dataclasses.fragments
+package com.example.papersynth.fragments
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -6,9 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import com.example.papersynth.CanvasView
 import com.example.papersynth.PlaybackEngine
 import com.example.papersynth.R
+import com.example.papersynth.views.CanvasView
 
 class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener {
 

@@ -1,4 +1,4 @@
-package com.example.papersynth.dataclasses.activities
+package com.example.papersynth.activities
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.add
 import androidx.fragment.app.commit
-import com.example.papersynth.dataclasses.fragments.CanvasFragment
+import com.example.papersynth.fragments.CanvasFragment
 import com.example.papersynth.PlaybackEngine.create
 import com.example.papersynth.PlaybackEngine.delete
 import com.example.papersynth.PlaybackEngine.setChannelCount

@@ -15,10 +15,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PaperSynth">
         <activity
-            android:name=".OscillatorCanvasActivity"
+            android:name="com.example.papersynth.activities.OscillatorCanvasActivity"
             android:screenOrientation="landscape" />
         <activity
-            android:name=".MainActivity"
+            android:name="com.example.papersynth.activities.MainActivity"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
