@@ -1,6 +1,8 @@
 package com.example.papersynth
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
@@ -10,12 +12,11 @@ import androidx.fragment.app.commit
 import com.example.papersynth.PlaybackEngine.create
 import com.example.papersynth.PlaybackEngine.delete
 import com.example.papersynth.PlaybackEngine.setChannelCount
-import com.example.papersynth.PlaybackEngine.setToneOn
 import com.example.papersynth.PlaybackEngine.start
 import com.example.papersynth.PlaybackEngine.stop
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     @Override
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,6 +44,9 @@ class MainActivity : AppCompatActivity() {
             .beginTransaction()
             .add(R.id.fragment_container_view, CanvasFragment())
             .commit()
+
+        val oscillatorActivityButton = findViewById<Button>(R.id.btn_oscillator_activity)
+        oscillatorActivityButton.setOnClickListener(this)
     }
 
     /*
@@ -68,5 +72,19 @@ class MainActivity : AppCompatActivity() {
         }
         delete()
         super.onPause()
+    }
+
+    @Override
+    override fun onClick(v: View?) {
+        when (v?.id) {
+            R.id.btn_oscillator_activity -> {
+                openOscillatorCanvas()
+            }
+        }
+    }
+
+    private fun openOscillatorCanvas() {
+        val oscillatorCanvasIntent = Intent(this@MainActivity, OscillatorCanvasActivity::class.java)
+        startActivity(oscillatorCanvasIntent)
     }
 }

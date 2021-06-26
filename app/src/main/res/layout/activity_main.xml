@@ -48,6 +48,20 @@
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@+id/fragment_container_view" />
 
+    <Button
+        android:id="@+id/btn_oscillator_activity"
+        android:layout_width="0dp"
+        android:layout_height="80dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:insetTop="8dp"
+        android:insetBottom="0dp"
+        app:backgroundTint="@color/elementD"
+        app:layout_constraintBottom_toTopOf="@+id/btn_play_wave"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/fragment_container_view" />
+
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/canvas_splitter"
         android:layout_width="wrap_content"
