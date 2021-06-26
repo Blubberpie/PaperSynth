@@ -1,4 +1,4 @@
-package com.example.papersynth
+package com.example.papersynth.dataclasses.views
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -9,9 +9,9 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.alpha
+import com.example.papersynth.R
 import com.example.papersynth.dataclasses.AlphaArray
 import kotlin.math.abs
-
 
 private const val STROKE_WIDTH = 12f
 

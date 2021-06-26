@@ -1,19 +1,20 @@
-package com.example.papersynth
+package com.example.papersynth.dataclasses.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.add
 import androidx.fragment.app.commit
+import com.example.papersynth.dataclasses.fragments.CanvasFragment
 import com.example.papersynth.PlaybackEngine.create
 import com.example.papersynth.PlaybackEngine.delete
 import com.example.papersynth.PlaybackEngine.setChannelCount
 import com.example.papersynth.PlaybackEngine.start
 import com.example.papersynth.PlaybackEngine.stop
+import com.example.papersynth.R
 
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
