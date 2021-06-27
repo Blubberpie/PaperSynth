@@ -5,52 +5,83 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.Path
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import com.example.papersynth.R
-import kotlin.math.abs
+import kotlin.math.PI
+import kotlin.math.sin
+import kotlin.math.pow
 
-private const val STROKE_WIDTH = 12f
+private const val NUM_SAMPLES = 256
+private const val HALF_WAVE_CYCLE = NUM_SAMPLES / (2 * PI.toFloat())
+private const val MAX_SAMPLE_VAL = 1f
+private const val MIN_SAMPLE_VAL = 0f
+private const val CANVAS_PADDING = 15f
+private const val GRID_STROKE_WIDTH = 1f
+private const val GRID_STROKE_ACCENT_WIDTH = 3f
 
 class OscillatorCanvasView : View {
+
+    // Private //
 
     private lateinit var mainCanvas: Canvas
     private lateinit var mainBitmap: Bitmap
 
-    private val brushColor = ResourcesCompat.getColor(resources, R.color.brushL, null)
-    private val resizedWidth = 335 // todo: this is really bad coding lol
-    private val resizedHeight = 108
+    // Dot-related
+
+    private val circleColor = ResourcesCompat.getColor(resources, R.color.tealD, null)
     private var motionTouchEventX = 0f
     private var motionTouchEventY = 0f
-    private var currentX = 0f
-    private var currentY = 0f
-
-    /* 28 pixels on Galaxy Note 5 */
-//    private val touchTolerance = ViewConfiguration.get(context).scaledTouchSlop
-    private val touchTolerance = 8f // make it smoother
-
-    private val brush = Paint().apply {
-        color = brushColor
+    private var dotSpreadAmount = 0f
+    private var dotRadius = 5f
+    private val circleBrush = Paint().apply {
+        color = circleColor
         isAntiAlias = true
         isDither = true
-        style = Paint.Style.STROKE // default: FILL
-        strokeJoin = Paint.Join.ROUND // default: MITER
-        strokeCap = Paint.Cap.ROUND // default: BUTT
-        strokeWidth = STROKE_WIDTH
+        style = Paint.Style.FILL
     }
 
-    private val drawing = Path() // the drawing so far
-    private val curPath = Path() // current drawing
+    // Grid-related
+
+    private val gridColor = ResourcesCompat.getColor(resources, R.color.elementD, null)
+    private var canvasWidth = 0f
+    private var canvasHeight = 0f
+    private var gridSpreadAmount = 0f
+    private val gridSpaceLength = 8
+    private val numGridSpaces = NUM_SAMPLES / gridSpaceLength
+    private val numSections = 4
+    private val gridBrush = Paint().apply {
+        color = gridColor
+        isAntiAlias = true
+        isDither = true
+        style = Paint.Style.STROKE
+        strokeWidth = GRID_STROKE_WIDTH
+    }
+    private val gridTextBrush = Paint().apply {
+        color = gridColor
+        isAntiAlias = true
+        isDither = true
+        textSize = 50f
+    }
+
+    private var sampleList = FloatArray(NUM_SAMPLES)
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
+    // TODO: onsizechanged is this a good thing?
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
         super.onSizeChanged(width, height, oldWidth, oldHeight)
+        initializeSineWave()
+        canvasWidth = width.toFloat() - (2 * CANVAS_PADDING)
+        canvasHeight = height.toFloat() - (2 * CANVAS_PADDING)
+        dotSpreadAmount = canvasWidth / 256
+        gridSpreadAmount = canvasWidth / numGridSpaces
+
         if (::mainBitmap.isInitialized) mainBitmap.recycle()
         mainBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         mainCanvas = Canvas(mainBitmap)
@@ -58,8 +89,8 @@ class OscillatorCanvasView : View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawPath(drawing, brush)
-        canvas.drawPath(curPath, brush)
+        drawCanvasGrid(canvas)
+        drawDotSamples(canvas)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -70,7 +101,6 @@ class OscillatorCanvasView : View {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> touchStart()
             MotionEvent.ACTION_MOVE -> touchMove()
-            MotionEvent.ACTION_UP -> touchUp()
         }
         return true
     }
@@ -78,32 +108,87 @@ class OscillatorCanvasView : View {
     // PRIVATE
 
     private fun touchStart() {
-        curPath.reset()
-        curPath.moveTo(motionTouchEventX, motionTouchEventY)
-        currentX = motionTouchEventX
-        currentY = motionTouchEventY
+        invalidate()
     }
 
     private fun touchMove() {
-        val dx = abs(motionTouchEventX - currentX)
-        val dy = abs(motionTouchEventY - currentY)
-        if (dx >= touchTolerance || dy >= touchTolerance) {
-            curPath.quadTo( // quadratic bezier from pt1 to pt2
-                currentX,
-                currentY,
-                (motionTouchEventX + currentX) / 2,
-                (motionTouchEventY + currentY) / 2
-            )
-            currentX = motionTouchEventX
-            currentY = motionTouchEventY
-            mainCanvas.drawPath(curPath, brush) // cache it
-        }
         invalidate() // force redraw screen with updated path
     }
 
-    private fun touchUp() {
-        drawing.addPath(curPath)
-        curPath.reset()
+    /**
+     * a * sin((x - h) / b) + k
+     */
+    private fun calculateSineSample(
+        x: Int,
+        b: Float=HALF_WAVE_CYCLE,
+        a: Float=0.5f, h: Float=0f, k: Float=0.5f
+    ): Float {
+        return a * sin((x.toFloat() - h) / b) + k
+    }
+
+    private fun initializeSineWave() {
+        for (i in 0 until NUM_SAMPLES) {
+            sampleList[i] = calculateSineSample(i)
+        }
+    }
+
+    private fun drawCanvasGrid(canvas: Canvas) {
+        val yCenter = (canvasHeight + (2 * CANVAS_PADDING)) / 2
+
+        // Horizontal center line
+        canvas.drawLine(
+            CANVAS_PADDING,
+            yCenter,
+            canvasWidth + CANVAS_PADDING,
+            yCenter,
+            gridBrush
+        )
+
+        // Vertical lines
+        for (i in 0 until numGridSpaces + 1) {
+            val curSampleCount = i * gridSpaceLength
+            val sectionLength = NUM_SAMPLES / numSections
+            val xPos = (i * gridSpreadAmount) + CANVAS_PADDING
+
+            if (curSampleCount % sectionLength == 0 || i == 0) {
+                if (i != numGridSpaces + 1) {
+                    canvas.drawText(
+                        curSampleCount.toString(),
+                        xPos + CANVAS_PADDING,
+                        CANVAS_PADDING + gridTextBrush.textSize,
+                        gridTextBrush
+                    )
+                }
+                setAccentedGridLine(true)
+            } else {
+                setAccentedGridLine(false)
+            }
+
+            canvas.drawLine(
+                xPos,
+                CANVAS_PADDING,
+                xPos,
+                canvasHeight + CANVAS_PADDING,
+                gridBrush
+            )
+        }
+    }
+
+    private fun drawDotSamples(canvas: Canvas) {
+        sampleList.forEachIndexed { i, sample ->
+            val xPos = (i * dotSpreadAmount) + CANVAS_PADDING
+            val yPos = (canvasHeight * (1 - sample)) + CANVAS_PADDING
+
+            canvas.drawCircle(xPos, yPos, dotRadius, circleBrush)
+        }
+    }
+
+    private fun setAccentedGridLine(accented: Boolean) {
+        if (accented) {
+            gridBrush.strokeWidth = GRID_STROKE_ACCENT_WIDTH
+        } else {
+            gridBrush.strokeWidth = GRID_STROKE_WIDTH
+        }
     }
 
 }
