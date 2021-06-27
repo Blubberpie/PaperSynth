@@ -14,6 +14,7 @@ import com.example.papersynth.R
 import kotlin.math.PI
 import kotlin.math.sin
 import kotlin.math.pow
+import kotlin.math.roundToInt
 
 private const val NUM_SAMPLES = 256
 private const val HALF_WAVE_CYCLE = NUM_SAMPLES / (2 * PI.toFloat())
@@ -99,26 +100,34 @@ class OscillatorCanvasView : View {
         motionTouchEventY = event.y
 
         when (event.action) {
-            MotionEvent.ACTION_DOWN -> touchStart()
-            MotionEvent.ACTION_MOVE -> touchMove()
+            MotionEvent.ACTION_DOWN -> touchAndMove()
+            MotionEvent.ACTION_MOVE -> touchAndMove()
         }
         return true
     }
 
     // PRIVATE
 
-    private fun touchStart() {
+    private fun touchAndMove() {
+        setNewSampleListValue()
         invalidate()
     }
 
-    private fun touchMove() {
-        invalidate() // force redraw screen with updated path
+    private fun setNewSampleListValue() {
+        var samplePos: Int = ((motionTouchEventX / canvasWidth) * NUM_SAMPLES).roundToInt()
+        val sampleVal: Float = 1 - (motionTouchEventY / canvasHeight)
+
+        // Protect against out of bounds
+        if (samplePos < 0) samplePos = 0
+        else if (samplePos >= NUM_SAMPLES) samplePos = NUM_SAMPLES - 1
+
+        sampleList[samplePos] = sampleVal
     }
 
     /**
      * a * sin((x - h) / b) + k
      */
-    private fun calculateSineSample(
+    private fun calculateSineSample( // TODO: move to util file?
         x: Int,
         b: Float=HALF_WAVE_CYCLE,
         a: Float=0.5f, h: Float=0f, k: Float=0.5f
