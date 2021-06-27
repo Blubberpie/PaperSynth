@@ -47,18 +47,7 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
 //            R.id.btn_clear -> { // Save bitmap
 //                val bitmap = canvasView.getBitmap()
 //                activity?.let { fragmentActivity ->
-//                    ActivityCompat.requestPermissions(fragmentActivity, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
-//
-//                    val filename = "test.png"
-//                    val file = File(fragmentActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "PaperSynth")
-//
-//                    if (!file.mkdirs()) {
-//                        Log.e("Directory error", "Directory not created")
-//                    }
-//
-//                    FileOutputStream(File(file, filename)).use { fos ->
-//                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
-//                    }
+//                    writeCanvasToFile(fragmentActivity, "test.png", bitmap)
 //                }
 //            }
         }

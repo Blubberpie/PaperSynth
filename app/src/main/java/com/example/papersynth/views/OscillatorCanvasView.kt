@@ -200,4 +200,10 @@ class OscillatorCanvasView : View {
         }
     }
 
+    // Public //
+
+    fun getOscillator(): FloatArray {
+        return sampleList
+    }
+
 }
