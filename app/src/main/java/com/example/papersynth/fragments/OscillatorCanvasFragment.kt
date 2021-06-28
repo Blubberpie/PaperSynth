@@ -47,7 +47,7 @@ class OscillatorCanvasFragment : Fragment(R.layout.fragment_oscillator_canvas), 
                 }
             }
             R.id.btn_test_fit -> {
-                oscillatorCanvasView.computeCurve()
+                oscillatorCanvasView.setFourierSeries(oscillatorCanvasView.computeCurve())
             }
         }
     }

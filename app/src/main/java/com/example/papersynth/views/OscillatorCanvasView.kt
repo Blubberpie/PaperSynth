@@ -11,7 +11,12 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import com.example.papersynth.R
+import com.example.papersynth.dataclasses.FourierSeries
 import com.example.papersynth.utils.CurveFittingUtil
+import org.jetbrains.kotlinx.multik.ndarray.data.D1
+import org.jetbrains.kotlinx.multik.ndarray.data.NDArray
+import org.jetbrains.kotlinx.multik.ndarray.operations.forEach
+import org.jetbrains.kotlinx.multik.ndarray.operations.forEachIndexed
 import kotlin.math.PI
 import kotlin.math.sin
 import kotlin.math.roundToInt
@@ -26,10 +31,12 @@ private const val GRID_STROKE_ACCENT_WIDTH = 3f
 
 class OscillatorCanvasView : View {
 
-    // Private //
+    // Late init //
 
     private lateinit var mainCanvas: Canvas
     private lateinit var mainBitmap: Bitmap
+    private lateinit var sampleListFourier: FourierSeries
+    private lateinit var calculatedFourierYs: NDArray<Float, D1>
 
     // Dot-related
 
@@ -68,6 +75,10 @@ class OscillatorCanvasView : View {
         textSize = 50f
     }
 
+    private val numStepsFourier = NUM_SAMPLES * 2
+    private val stepSizeFourier = 2f / numStepsFourier
+    private val arrXsFourier: NDArray<Float, D1> = CurveFittingUtil.generateXs(stepSizeFourier)
+
     private var sampleList = FloatArray(NUM_SAMPLES)
 
     constructor(context: Context) : this(context, null)
@@ -78,6 +89,9 @@ class OscillatorCanvasView : View {
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
         super.onSizeChanged(width, height, oldWidth, oldHeight)
         initializeSineWave()
+        setFourierSeries(computeCurve())
+        calculatedFourierYs = CurveFittingUtil.initializeFourierYs(numStepsFourier, sampleListFourier.a0)
+
         canvasWidth = width.toFloat() - (2 * CANVAS_PADDING)
         canvasHeight = height.toFloat() - (2 * CANVAS_PADDING)
         dotSpreadAmount = canvasWidth / 256
@@ -91,7 +105,8 @@ class OscillatorCanvasView : View {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         drawCanvasGrid(canvas)
-        drawDotSamples(canvas)
+//        drawDotSamples(canvas)
+        drawFourierSeries(canvas)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -106,23 +121,14 @@ class OscillatorCanvasView : View {
         return true
     }
 
-    // PRIVATE
+    //// PRIVATE ////
 
     private fun touchAndMove() {
         setNewSampleListValue()
         invalidate()
     }
 
-    private fun setNewSampleListValue() {
-        var samplePos: Int = ((motionTouchEventX / canvasWidth) * NUM_SAMPLES).roundToInt()
-        val sampleVal: Float = 1 - (motionTouchEventY / canvasHeight)
-
-        // Protect against out of bounds
-        if (samplePos < 0) samplePos = 0
-        else if (samplePos >= NUM_SAMPLES) samplePos = NUM_SAMPLES - 1
-
-        sampleList[samplePos] = sampleVal
-    }
+    // CALCULATIONS //
 
     /**
      * Computes the sin of a given x with the equation:
@@ -145,6 +151,32 @@ class OscillatorCanvasView : View {
     private fun initializeSineWave() {
         for (i in 0 until NUM_SAMPLES) {
             sampleList[i] = calculateSineSample(i)
+        }
+    }
+
+    // Drawing //
+
+    private fun drawFourierSeries(canvas: Canvas) {
+        val ys = CurveFittingUtil.calculateValuesByCoefficients(
+            sampleListFourier,
+            arrXsFourier,
+            calculatedFourierYs
+        )
+
+        ys.forEachIndexed { i: Int, sample: Float ->
+            val xPos = (i * (canvasWidth / numStepsFourier)) + CANVAS_PADDING
+            val yPos = (canvasHeight * (1 - sample)) + CANVAS_PADDING
+
+            canvas.drawCircle(xPos, yPos, dotRadius, circleBrush)
+        }
+    }
+
+    private fun drawDotSamples(canvas: Canvas) {
+        sampleList.forEachIndexed { i, sample ->
+            val xPos = (i * dotSpreadAmount) + CANVAS_PADDING
+            val yPos = (canvasHeight * (1 - sample)) + CANVAS_PADDING
+
+            canvas.drawCircle(xPos, yPos, dotRadius, circleBrush)
         }
     }
 
@@ -190,14 +222,7 @@ class OscillatorCanvasView : View {
         }
     }
 
-    private fun drawDotSamples(canvas: Canvas) {
-        sampleList.forEachIndexed { i, sample ->
-            val xPos = (i * dotSpreadAmount) + CANVAS_PADDING
-            val yPos = (canvasHeight * (1 - sample)) + CANVAS_PADDING
-
-            canvas.drawCircle(xPos, yPos, dotRadius, circleBrush)
-        }
-    }
+    // Setters //
 
     private fun setAccentedGridLine(accented: Boolean) {
         if (accented) {
@@ -207,13 +232,28 @@ class OscillatorCanvasView : View {
         }
     }
 
-    // Public //
+    private fun setNewSampleListValue() {
+        var samplePos: Int = ((motionTouchEventX / canvasWidth) * NUM_SAMPLES).roundToInt()
+        val sampleVal: Float = 1 - (motionTouchEventY / canvasHeight)
+
+        // Protect against out of bounds
+        if (samplePos < 0) samplePos = 0
+        else if (samplePos >= NUM_SAMPLES) samplePos = NUM_SAMPLES - 1
+
+        sampleList[samplePos] = sampleVal
+    }
+
+    //// Public ////
 
     fun getOscillator(): FloatArray {
         return sampleList
     }
 
-    fun computeCurve() {
-        CurveFittingUtil.fit(sampleList, NUM_SAMPLES)
+    fun computeCurve(): FourierSeries {
+        return CurveFittingUtil.fit(sampleList, NUM_SAMPLES)
+    }
+
+    fun setFourierSeries(fourierSeries: FourierSeries) {
+        sampleListFourier = fourierSeries
     }
 }
