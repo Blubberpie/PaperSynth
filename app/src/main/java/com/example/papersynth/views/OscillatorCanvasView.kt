@@ -214,6 +214,6 @@ class OscillatorCanvasView : View {
     }
 
     fun computeCurve() {
-        CurveFittingUtil.test()
+        CurveFittingUtil.fit(sampleList, NUM_SAMPLES)
     }
 }
