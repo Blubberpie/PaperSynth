@@ -11,9 +11,9 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import com.example.papersynth.R
+import com.example.papersynth.utils.CurveFittingUtil
 import kotlin.math.PI
 import kotlin.math.sin
-import kotlin.math.pow
 import kotlin.math.roundToInt
 
 private const val NUM_SAMPLES = 256
@@ -125,7 +125,14 @@ class OscillatorCanvasView : View {
     }
 
     /**
-     * a * sin((x - h) / b) + k
+     * Computes the sin of a given x with the equation:
+     * a * sin((x.toFloat() - h) / b) + k
+     *
+     * @param x Input variable
+     * @param a Amplitude
+     * @param h Horizontal shift
+     * @param k Vertical shift
+     * @param b Periodicity factor
      */
     private fun calculateSineSample( // TODO: move to util file?
         x: Int,
@@ -206,4 +213,7 @@ class OscillatorCanvasView : View {
         return sampleList
     }
 
+    fun computeCurve() {
+        CurveFittingUtil.test()
+    }
 }

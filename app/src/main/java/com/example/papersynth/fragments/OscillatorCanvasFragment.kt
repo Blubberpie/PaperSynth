@@ -27,6 +27,8 @@ class OscillatorCanvasFragment : Fragment(R.layout.fragment_oscillator_canvas), 
 
         val saveOscButton = activity?.findViewById<Button>(R.id.btn_save_oscillator)
         saveOscButton?.setOnClickListener(this)
+        val testFitButton = activity?.findViewById<Button>(R.id.btn_test_fit)
+        testFitButton?.setOnClickListener(this)
 
         return view
     }
@@ -43,6 +45,9 @@ class OscillatorCanvasFragment : Fragment(R.layout.fragment_oscillator_canvas), 
                         Log.e("Error", "Error occurred while trying to save oscillator as JSON file!")
                     }
                 }
+            }
+            R.id.btn_test_fit -> {
+                oscillatorCanvasView.computeCurve()
             }
         }
     }
