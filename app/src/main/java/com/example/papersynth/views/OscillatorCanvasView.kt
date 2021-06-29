@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Path
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
@@ -78,6 +79,9 @@ class OscillatorCanvasView : View {
     private val numStepsFourier = NUM_SAMPLES * 2
     private val stepSizeFourier = 2f / numStepsFourier
     private val arrXsFourier: NDArray<Float, D1> = CurveFittingUtil.generateXs(stepSizeFourier)
+    private var fourierSampleSpreadAmount = 0f
+
+    private val fourierPath = Path()
 
     private var sampleList = FloatArray(NUM_SAMPLES)
 
@@ -90,12 +94,14 @@ class OscillatorCanvasView : View {
         super.onSizeChanged(width, height, oldWidth, oldHeight)
         initializeSineWave()
         setFourierSeries(computeCurve())
-        calculatedFourierYs = CurveFittingUtil.initializeFourierYs(numStepsFourier, sampleListFourier.a0)
+        generateYs()
+        generateFourierPath()
 
         canvasWidth = width.toFloat() - (2 * CANVAS_PADDING)
         canvasHeight = height.toFloat() - (2 * CANVAS_PADDING)
         dotSpreadAmount = canvasWidth / 256
         gridSpreadAmount = canvasWidth / numGridSpaces
+        fourierSampleSpreadAmount = canvasWidth / numStepsFourier
 
         if (::mainBitmap.isInitialized) mainBitmap.recycle()
         mainBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
@@ -105,7 +111,7 @@ class OscillatorCanvasView : View {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         drawCanvasGrid(canvas)
-//        drawDotSamples(canvas)
+        drawDotSamples(canvas)
         drawFourierSeries(canvas)
     }
 
@@ -117,6 +123,7 @@ class OscillatorCanvasView : View {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> touchAndMove()
             MotionEvent.ACTION_MOVE -> touchAndMove()
+//            MotionEvent.ACTION_UP -> touchUp()
         }
         return true
     }
@@ -125,8 +132,17 @@ class OscillatorCanvasView : View {
 
     private fun touchAndMove() {
         setNewSampleListValue()
+        setFourierSeries(computeCurve())
+        generateYs()
+        generateFourierPath()
         invalidate()
     }
+
+//    private fun touchUp() {
+//        setFourierSeries(computeCurve())
+//        generateYs()
+//        generateFourierPath()
+//    }
 
     // CALCULATIONS //
 
@@ -154,21 +170,42 @@ class OscillatorCanvasView : View {
         }
     }
 
-    // Drawing //
-
-    private fun drawFourierSeries(canvas: Canvas) {
-        val ys = CurveFittingUtil.calculateValuesByCoefficients(
+    private fun generateYs() {
+        calculatedFourierYs = CurveFittingUtil.initializeFourierYs(numStepsFourier, sampleListFourier.a0)
+        calculatedFourierYs = CurveFittingUtil.calculateValuesByCoefficients(
             sampleListFourier,
             arrXsFourier,
             calculatedFourierYs
         )
+    }
 
-        ys.forEachIndexed { i: Int, sample: Float ->
-            val xPos = (i * (canvasWidth / numStepsFourier)) + CANVAS_PADDING
+    private fun generateFourierPath() {
+        var lastXPos = CANVAS_PADDING
+        var lastYPos = CANVAS_PADDING
+
+        fourierPath.reset()
+
+        Log.d("test", "$fourierSampleSpreadAmount")
+
+        calculatedFourierYs.forEachIndexed { i: Int, sample: Float ->
+            val xPos = (i * fourierSampleSpreadAmount) + CANVAS_PADDING
             val yPos = (canvasHeight * (1 - sample)) + CANVAS_PADDING
 
-            canvas.drawCircle(xPos, yPos, dotRadius, circleBrush)
+            fourierPath.quadTo(
+                lastXPos,
+                lastYPos,
+                (xPos + lastXPos) / 2,
+                (yPos + lastYPos) / 2,
+            )
+            lastXPos = xPos
+            lastYPos = yPos
         }
+    }
+
+    // Drawing //
+
+    private fun drawFourierSeries(canvas: Canvas) {
+        canvas.drawPath(fourierPath, gridBrush)
     }
 
     private fun drawDotSamples(canvas: Canvas) {
