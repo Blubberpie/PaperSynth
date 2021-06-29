@@ -11,13 +11,15 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
+import androidx.fragment.app.FragmentActivity
 import com.example.papersynth.R
 import com.example.papersynth.dataclasses.FourierSeries
 import com.example.papersynth.utils.CurveFittingUtil
+import com.example.papersynth.utils.FileUtil
 import org.jetbrains.kotlinx.multik.ndarray.data.D1
 import org.jetbrains.kotlinx.multik.ndarray.data.NDArray
-import org.jetbrains.kotlinx.multik.ndarray.operations.forEach
 import org.jetbrains.kotlinx.multik.ndarray.operations.forEachIndexed
+import java.io.FileNotFoundException
 import kotlin.math.PI
 import kotlin.math.sin
 import kotlin.math.roundToInt
@@ -92,10 +94,19 @@ class OscillatorCanvasView : View {
     // TODO: onsizechanged is this a good thing?
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
         super.onSizeChanged(width, height, oldWidth, oldHeight)
-        initializeSineWave()
-        setFourierSeries(computeCurve())
-        generateYs()
-        generateFourierPath()
+
+        try {
+            val activity: FragmentActivity = context as FragmentActivity
+            val data: FloatArray? = FileUtil.readOscillatorFromFile(activity, "my_oscillators.json")
+            if (data == null) {
+                resetOscillator()
+            } else {
+                sampleList = data
+            }
+
+        } catch (e: FileNotFoundException) {
+
+        }
 
         canvasWidth = width.toFloat() - (2 * CANVAS_PADDING)
         canvasHeight = height.toFloat() - (2 * CANVAS_PADDING)
@@ -123,7 +134,7 @@ class OscillatorCanvasView : View {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> touchAndMove()
             MotionEvent.ACTION_MOVE -> touchAndMove()
-//            MotionEvent.ACTION_UP -> touchUp()
+            MotionEvent.ACTION_UP -> touchUp()
         }
         return true
     }
@@ -132,19 +143,20 @@ class OscillatorCanvasView : View {
 
     private fun touchAndMove() {
         setNewSampleListValue()
-        setFourierSeries(computeCurve())
-        generateYs()
-        generateFourierPath()
         invalidate()
     }
 
-//    private fun touchUp() {
-//        setFourierSeries(computeCurve())
-//        generateYs()
-//        generateFourierPath()
-//    }
+    private fun touchUp() {
+        handleFourierComputations()
+    }
 
     // CALCULATIONS //
+
+    private fun handleFourierComputations() {
+        setFourierSeries(computeCurve())
+        generateYs()
+        generateFourierPath()
+    }
 
     /**
      * Computes the sin of a given x with the equation:
@@ -185,8 +197,6 @@ class OscillatorCanvasView : View {
 
         fourierPath.reset()
 
-        Log.d("test", "$fourierSampleSpreadAmount")
-
         calculatedFourierYs.forEachIndexed { i: Int, sample: Float ->
             val xPos = (i * fourierSampleSpreadAmount) + CANVAS_PADDING
             val yPos = (canvasHeight * (1 - sample)) + CANVAS_PADDING
@@ -200,6 +210,10 @@ class OscillatorCanvasView : View {
             lastXPos = xPos
             lastYPos = yPos
         }
+    }
+
+    private fun computeCurve(): FourierSeries {
+        return CurveFittingUtil.fit(sampleList, NUM_SAMPLES)
     }
 
     // Drawing //
@@ -280,17 +294,19 @@ class OscillatorCanvasView : View {
         sampleList[samplePos] = sampleVal
     }
 
+    private fun setFourierSeries(fourierSeries: FourierSeries) {
+        sampleListFourier = fourierSeries
+    }
+
     //// Public ////
 
     fun getOscillator(): FloatArray {
         return sampleList
     }
 
-    fun computeCurve(): FourierSeries {
-        return CurveFittingUtil.fit(sampleList, NUM_SAMPLES)
-    }
-
-    fun setFourierSeries(fourierSeries: FourierSeries) {
-        sampleListFourier = fourierSeries
+    fun resetOscillator() {
+        initializeSineWave()
+        handleFourierComputations()
+        invalidate()
     }
 }

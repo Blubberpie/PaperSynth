@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import com.example.papersynth.R
-import com.example.papersynth.utils.FileWriterUtil.writeOscillatorToFile
+import com.example.papersynth.utils.FileUtil.writeOscillatorToFile
 import com.example.papersynth.views.OscillatorCanvasView
 import java.io.*
 
@@ -27,7 +27,7 @@ class OscillatorCanvasFragment : Fragment(R.layout.fragment_oscillator_canvas), 
 
         val saveOscButton = activity?.findViewById<Button>(R.id.btn_save_oscillator)
         saveOscButton?.setOnClickListener(this)
-        val testFitButton = activity?.findViewById<Button>(R.id.btn_test_fit)
+        val testFitButton = activity?.findViewById<Button>(R.id.btn_reset_oscillator)
         testFitButton?.setOnClickListener(this)
 
         return view
@@ -46,8 +46,8 @@ class OscillatorCanvasFragment : Fragment(R.layout.fragment_oscillator_canvas), 
                     }
                 }
             }
-            R.id.btn_test_fit -> {
-                oscillatorCanvasView.setFourierSeries(oscillatorCanvasView.computeCurve())
+            R.id.btn_reset_oscillator -> {
+                oscillatorCanvasView.resetOscillator()
             }
         }
     }
