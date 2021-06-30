@@ -72,7 +72,6 @@ object CurveFittingUtil {
     }
 
     fun initializeFourierYs(n: Int, firstCoefficient: Float): NDArray<Float, D1> {
-        // Center the function at A0 / 2
         return mk.empty<Float, D1>(n).map { firstCoefficient / 2 }
     }
 
@@ -80,6 +79,24 @@ object CurveFittingUtil {
         return mk
             .arange<Float>(-1, 1, stepSize.toDouble())
             .map { x: Float -> (x + stepSize) * period }
+    }
+
+    /**
+     * Computes the sin of a given x with the equation:
+     * a * sin((x.toFloat() - h) / b) + k
+     *
+     * @param x Input variable
+     * @param a Amplitude
+     * @param h Horizontal shift
+     * @param k Vertical shift
+     * @param b Periodicity factor
+     */
+     fun calculateSineSample(
+        x: Int,
+        b: Float,
+        a: Float=1f, h: Float=0f, k: Float=0f
+    ): Float {
+        return a * sin((x.toFloat() - h) / b) + k
     }
 
     // PRIVATE //

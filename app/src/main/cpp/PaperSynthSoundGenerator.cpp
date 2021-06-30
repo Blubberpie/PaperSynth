@@ -4,22 +4,28 @@
 
 #include "PaperSynthSoundGenerator.h"
 
-PaperSynthSoundGenerator::PaperSynthSoundGenerator(int32_t sampleRate, int32_t channelCount)
+PaperSynthSoundGenerator::PaperSynthSoundGenerator(
+        int32_t sampleRate,
+        int32_t channelCount,
+        const FourierSeries& fourierSeries
+)
         : TappableAudioSource(sampleRate, channelCount) {
 
 //    lastPitchChangeTime_ = high_resolution_clock::now();
     float amplitude = 1.0f / (float)numOscs_; // TODO: make dynamic
 
+    std::vector<float> fourierWave = calculateFourierWave(fourierSeries);
+
     for (int i = 0; i < numOscs_; ++i) {
-        auto osc = new PaperSynthOscillator(); // TODO: handle delete?? somehow?
+        auto osc = new PaperSynthOscillator(fourierWave); // TODO: handle delete?? somehow?
         osc->setSampleRate(SAMPLE_RATE_DEFAULT);
         osc->setFrequency(curFrequency); // TODO: handle this
         osc->setAmplitude(amplitude);
         oscillators_.push_back(osc);
         mixer_.addTrack(osc);
         curFrequency = curFrequency / INTERVAL_SEMITONE;
-        if (curFrequency <= 55.0) {
-            curFrequency = 16744.036179238312619382;
+        if (curFrequency <= MINIMUM_FREQUENCY) {
+            curFrequency = MAXIMUM_FREQUENCY;
         }
     }
 
@@ -60,4 +66,8 @@ void PaperSynthSoundGenerator::processAlphaArray(bool disableAll) {
             oscillators_[row]->setWaveOn(false);
         }
     }
+}
+
+std::vector<float> PaperSynthSoundGenerator::calculateFourierWave(FourierSeries fourierSeries) {
+    return std::vector<float>();
 }

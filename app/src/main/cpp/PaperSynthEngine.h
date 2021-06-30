@@ -11,6 +11,7 @@
 #include <DefaultErrorCallback.h>
 #include <logging_macros.h>
 
+#include "FourierSeries.h"
 #include "PaperSynthOscillator.h"
 #include "PaperSynthLatencyTuningCallback.h"
 #include "PaperSynthSoundGenerator.h"
@@ -21,7 +22,7 @@ constexpr int32_t BUFFER_SIZE_AUTOMATIC = 0;
 
 class PaperSynthEngine : public IRestartable {
 public:
-    PaperSynthEngine();
+    PaperSynthEngine(FourierSeries fourierSeries);
     virtual  ~PaperSynthEngine() = default;
 
     void tap(bool isDown);
@@ -69,6 +70,7 @@ private:
     oboe::Result reopenStream();
     oboe::Result openPlaybackStream();
 
+    FourierSeries fourierSeries_;
     std::shared_ptr<oboe::AudioStream> stream_;
     std::unique_ptr<PaperSynthLatencyTuningCallback> latencyCallback_;
     std::unique_ptr<DefaultErrorCallback> errorCallback_;

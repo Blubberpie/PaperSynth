@@ -15,6 +15,7 @@ import androidx.fragment.app.FragmentActivity
 import com.example.papersynth.R
 import com.example.papersynth.dataclasses.FourierSeries
 import com.example.papersynth.utils.CurveFittingUtil
+import com.example.papersynth.utils.CurveFittingUtil.calculateSineSample
 import com.example.papersynth.utils.FileUtil
 import org.jetbrains.kotlinx.multik.ndarray.data.D1
 import org.jetbrains.kotlinx.multik.ndarray.data.NDArray
@@ -60,6 +61,7 @@ class OscillatorCanvasView : View {
     private val gridColor = ResourcesCompat.getColor(resources, R.color.elementD, null)
     private var canvasWidth = 0f
     private var canvasHeight = 0f
+    private var canvasHalfHeight = 0f
     private var gridSpreadAmount = 0f
     private val gridSpaceLength = 8
     private val numGridSpaces = NUM_SAMPLES / gridSpaceLength
@@ -82,6 +84,7 @@ class OscillatorCanvasView : View {
     private val stepSizeFourier = 2f / numStepsFourier
     private val arrXsFourier: NDArray<Float, D1> = CurveFittingUtil.generateXs(stepSizeFourier)
     private var fourierSampleSpreadAmount = 0f
+    private var firstTime = true
 
     private val fourierPath = Path()
 
@@ -105,11 +108,12 @@ class OscillatorCanvasView : View {
             }
 
         } catch (e: FileNotFoundException) {
-
+            resetOscillator()
         }
 
         canvasWidth = width.toFloat() - (2 * CANVAS_PADDING)
         canvasHeight = height.toFloat() - (2 * CANVAS_PADDING)
+        canvasHalfHeight = canvasHeight / 2
         dotSpreadAmount = canvasWidth / 256
         gridSpreadAmount = canvasWidth / numGridSpaces
         fourierSampleSpreadAmount = canvasWidth / numStepsFourier
@@ -121,6 +125,10 @@ class OscillatorCanvasView : View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        if (firstTime) { // workaround
+            handleFourierComputations()
+            firstTime = false
+        }
         drawCanvasGrid(canvas)
         drawDotSamples(canvas)
         drawFourierSeries(canvas)
@@ -158,27 +166,9 @@ class OscillatorCanvasView : View {
         generateFourierPath()
     }
 
-    /**
-     * Computes the sin of a given x with the equation:
-     * a * sin((x.toFloat() - h) / b) + k
-     *
-     * @param x Input variable
-     * @param a Amplitude
-     * @param h Horizontal shift
-     * @param k Vertical shift
-     * @param b Periodicity factor
-     */
-    private fun calculateSineSample( // TODO: move to util file?
-        x: Int,
-        b: Float=HALF_WAVE_CYCLE,
-        a: Float=0.5f, h: Float=0f, k: Float=0.5f
-    ): Float {
-        return a * sin((x.toFloat() - h) / b) + k
-    }
-
     private fun initializeSineWave() {
         for (i in 0 until NUM_SAMPLES) {
-            sampleList[i] = calculateSineSample(i)
+            sampleList[i] = calculateSineSample(i, b=HALF_WAVE_CYCLE)
         }
     }
 
@@ -199,7 +189,7 @@ class OscillatorCanvasView : View {
 
         calculatedFourierYs.forEachIndexed { i: Int, sample: Float ->
             val xPos = (i * fourierSampleSpreadAmount) + CANVAS_PADDING
-            val yPos = (canvasHeight * (1 - sample)) + CANVAS_PADDING
+            val yPos = (canvasHalfHeight * (1 - sample)) + CANVAS_PADDING
 
             fourierPath.quadTo(
                 lastXPos,
@@ -225,7 +215,7 @@ class OscillatorCanvasView : View {
     private fun drawDotSamples(canvas: Canvas) {
         sampleList.forEachIndexed { i, sample ->
             val xPos = (i * dotSpreadAmount) + CANVAS_PADDING
-            val yPos = (canvasHeight * (1 - sample)) + CANVAS_PADDING
+            val yPos = (canvasHalfHeight * (1 - sample)) + CANVAS_PADDING
 
             canvas.drawCircle(xPos, yPos, dotRadius, circleBrush)
         }
@@ -284,8 +274,8 @@ class OscillatorCanvasView : View {
     }
 
     private fun setNewSampleListValue() {
-        var samplePos: Int = ((motionTouchEventX / canvasWidth) * NUM_SAMPLES).roundToInt()
-        val sampleVal: Float = 1 - (motionTouchEventY / canvasHeight)
+        var samplePos: Int = ((motionTouchEventX - CANVAS_PADDING) / dotSpreadAmount).roundToInt()
+        val sampleVal: Float = -(motionTouchEventY - CANVAS_PADDING - canvasHalfHeight) / canvasHalfHeight
 
         // Protect against out of bounds
         if (samplePos < 0) samplePos = 0

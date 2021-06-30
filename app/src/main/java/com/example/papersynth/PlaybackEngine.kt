@@ -4,13 +4,20 @@ import android.content.Context
 import android.media.AudioManager
 import android.os.Build
 import com.example.papersynth.dataclasses.AlphaArray
+import com.example.papersynth.dataclasses.FourierSeries
+import org.jetbrains.kotlinx.multik.ndarray.operations.toList
 
 object PlaybackEngine {
     private var mEngineHandle: Long = 0
-    fun create(context: Context): Boolean {
+    fun create(context: Context, fourierSeries: FourierSeries): Boolean {
         if (mEngineHandle == 0L) {
             setDefaultStreamValues(context)
-            mEngineHandle = nativeCreateEngine()
+            mEngineHandle = nativeCreateEngine(
+                fourierSeries.coefficientsA.toList().toFloatArray(),
+                fourierSeries.coefficientsB.toList().toFloatArray(),
+                fourierSeries.numTerms,
+                fourierSeries.a0
+            )
         }
         return mEngineHandle != 0L
     }
@@ -85,7 +92,7 @@ object PlaybackEngine {
         get() = mEngineHandle != 0L && nativeIsLatencyDetectionSupported(mEngineHandle)
 
     // Native methods
-    private external fun nativeCreateEngine(): Long
+    private external fun nativeCreateEngine(coefficientsA: FloatArray, coefficientsB: FloatArray, numTerms: Int, a0: Float): Long
     private external fun nativeStartEngine(engineHandle: Long): Int
     private external fun nativeStopEngine(engineHandle: Long): Int
     private external fun nativeDeleteEngine(engineHandle: Long)

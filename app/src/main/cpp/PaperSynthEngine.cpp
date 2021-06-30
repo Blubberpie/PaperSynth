@@ -10,8 +10,9 @@
 #include "PaperSynthEngine.h"
 #include "PaperSynthOscillator.h"
 
-PaperSynthEngine::PaperSynthEngine()
-        : latencyCallback_(std::make_unique<PaperSynthLatencyTuningCallback>())
+PaperSynthEngine::PaperSynthEngine(FourierSeries fourierSeries)
+        : fourierSeries_(std::move(fourierSeries))
+        , latencyCallback_(std::make_unique<PaperSynthLatencyTuningCallback>())
         , errorCallback_(std::make_unique<DefaultErrorCallback>(*this)){
 }
 
@@ -26,8 +27,10 @@ oboe::Result PaperSynthEngine::start() {
     isLatencyDetectionSupported_ = false;
     auto result = openPlaybackStream();
     if (result == oboe::Result::OK){
-        audioSource_ =  std::make_shared<PaperSynthSoundGenerator>(stream_->getSampleRate(),
-                                                         stream_->getChannelCount());
+        audioSource_ =  std::make_shared<PaperSynthSoundGenerator>(
+                stream_->getSampleRate(),
+                stream_->getChannelCount(),
+                fourierSeries_);
         latencyCallback_->setSource(std::dynamic_pointer_cast<IRenderableAudio>(audioSource_));
 
         LOGD("Stream opened: AudioAPI = %d, channelCount = %d, deviceID = %d",

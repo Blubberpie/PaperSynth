@@ -3,9 +3,10 @@
 #include <android/input.h>
 
 #include "PaperSynthEngine.h"
+#include "FourierSeries.h"
 #include <logging_macros.h>
 
-std::vector<int> convertJavaArrayToVector(JNIEnv *env, jintArray intArray) {
+std::vector<int> convertJavaIntArrayToVector(JNIEnv *env, jintArray intArray) {
     std::vector<int> v;
     jsize length = env->GetArrayLength(intArray);
     if (length > 0) {
@@ -13,6 +14,18 @@ std::vector<int> convertJavaArrayToVector(JNIEnv *env, jintArray intArray) {
         v.insert(v.end(), &elements[0], &elements[length]);
         // Unpin the memory for the array, or free the copy.
         env->ReleaseIntArrayElements(intArray, elements, 0);
+    }
+    return v;
+}
+
+std::vector<float> convertJavaFloatArrayToVector(JNIEnv *env, jfloatArray floatArray) {
+    std::vector<float> v;
+    jsize length = env->GetArrayLength(floatArray);
+    if (length > 0) {
+        jfloat *elements = env->GetFloatArrayElements(floatArray, nullptr);
+        v.insert(v.end(), &elements[0], &elements[length]);
+        // Unpin the memory for the array, or free the copy.
+        env->ReleaseFloatArrayElements(floatArray, elements, 0);
     }
     return v;
 }
@@ -27,10 +40,20 @@ extern "C" {
 JNIEXPORT jlong JNICALL
 Java_com_example_papersynth_PlaybackEngine_nativeCreateEngine(
         JNIEnv *env,
-        jobject thiz) {
+        jobject thiz,
+        jfloatArray jCoefficientsA,
+        jfloatArray jCoefficientsB,
+        jint jNumTerms,
+        jfloat jA0
+) {
+
+    std::vector<float> coefficientsA = convertJavaFloatArrayToVector(env, jCoefficientsA);
+    std::vector<float> coefficientsB = convertJavaFloatArrayToVector(env, jCoefficientsB);
 
     // We use std::nothrow so `new` returns a nullptr if the engine creation fails
-    auto *engine = new(std::nothrow) PaperSynthEngine();
+    auto *engine = new(std::nothrow) PaperSynthEngine(
+            FourierSeries(coefficientsA, coefficientsB, jNumTerms, jA0)
+            );
     if (engine == nullptr) {
         LOGE("Could not instantiate PaperSynthEngine");
         return 0;
@@ -194,7 +217,7 @@ Java_com_example_papersynth_PlaybackEngine_nativeSetAlphaArray(
         jint jWidth,
         jint jHeight) {
 
-    std::vector<int> alphaArray = convertJavaArrayToVector(env, jAlphaArray);
+    std::vector<int> alphaArray = convertJavaIntArrayToVector(env, jAlphaArray);
 
     auto *engine = reinterpret_cast<PaperSynthEngine*>(engineHandle);
     if (engine) {

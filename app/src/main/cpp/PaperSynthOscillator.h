@@ -13,6 +13,8 @@
 #include <IRenderableAudio.h>
 #include <logging_macros.h>
 
+#include "FourierSeries.h"
+
 constexpr double FREQUENCY_DEFAULT = 440.0;
 constexpr int32_t SAMPLE_RATE_DEFAULT = 48000;
 constexpr double PI = M_PI;
@@ -20,8 +22,10 @@ constexpr double TWO_PI = PI * 2;
 
 class PaperSynthOscillator : public IRenderableAudio {
 public:
+    PaperSynthOscillator(std::vector<float> fourierWave);
     ~PaperSynthOscillator() = default;
 
+    void setFourierWave(std::vector<float> fourierWave);
     void setWaveOn(bool isWaveOn);
     void setSampleRate(int32_t sampleRate);
     void setFrequency(double frequency);
@@ -33,6 +37,7 @@ public:
     void renderAudio(float *audioData, int32_t numFrames) override;
 
 private:
+    std::vector<float> fourierWave_;
     std::atomic<bool> isWaveOn_ { false };
     std::atomic<float> amplitude_ { 0 };
     std::atomic<double> phaseIncrement_ { 0.0 };

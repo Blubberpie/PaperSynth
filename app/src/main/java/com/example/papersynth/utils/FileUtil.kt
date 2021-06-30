@@ -1,6 +1,7 @@
 package com.example.papersynth.utils
 
 import android.Manifest
+import android.app.Activity
 import android.graphics.Bitmap
 import android.os.Environment
 import android.util.JsonReader
@@ -39,14 +40,14 @@ object FileUtil {
 
     @Throws(IOException::class)
     fun readOscillatorFromFile(
-        fragmentActivity: FragmentActivity,
+        activity: Activity,
         filename: String
     ) : FloatArray? {
 
-        ActivityCompat.requestPermissions(fragmentActivity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
+        ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
 
         var floatArr: FloatArray?
-        val dir = File(fragmentActivity.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "PaperSynth")
+        val dir = File(activity.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "PaperSynth")
 
         if (!dir.exists()) {
             throw FileNotFoundException("PaperSynth directory doesn't exist in Documents")

@@ -1,7 +1,9 @@
 package com.example.papersynth.activities
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
@@ -15,9 +17,17 @@ import com.example.papersynth.PlaybackEngine.setChannelCount
 import com.example.papersynth.PlaybackEngine.start
 import com.example.papersynth.PlaybackEngine.stop
 import com.example.papersynth.R
+import com.example.papersynth.dataclasses.FourierSeries
+import com.example.papersynth.utils.CurveFittingUtil
+import com.example.papersynth.utils.FileUtil
+import kotlin.math.PI
 
+private const val NUM_SAMPLES = 256
+private const val HALF_WAVE_CYCLE = NUM_SAMPLES / (2 * PI.toFloat())
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
+
+    private lateinit var fourierSeries: FourierSeries
 
     @Override
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,6 +56,17 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             .add(R.id.fragment_container_view, CanvasFragment())
             .commit()
 
+        val oscData: FloatArray? = FileUtil.readOscillatorFromFile(this as Activity, "my_oscillators.json")
+        if (oscData == null) {
+            val oscDataNew = FloatArray(NUM_SAMPLES)
+            for (i in 0 until NUM_SAMPLES) {
+                oscDataNew[i] = CurveFittingUtil.calculateSineSample(i, b = HALF_WAVE_CYCLE)
+            }
+            fourierSeries = CurveFittingUtil.fit(oscDataNew, NUM_SAMPLES)
+        } else {
+            fourierSeries = CurveFittingUtil.fit(oscData, NUM_SAMPLES)
+        }
+
         val oscillatorActivityButton = findViewById<Button>(R.id.btn_oscillator_activity)
         oscillatorActivityButton.setOnClickListener(this)
     }
@@ -57,7 +78,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     @Override
     override fun onResume() {
         super.onResume()
-        create(this)
+        Log.d("test", "here")
+        create(this, fourierSeries)
         setChannelCount(2) // stereo
         val result = start()
         if (result != 0) {

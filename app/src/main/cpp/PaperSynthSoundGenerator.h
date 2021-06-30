@@ -7,6 +7,8 @@
 
 #include "PaperSynthOscillator.h"
 #include "PaperSynthMixer.h"
+#include "FourierSeries.h"
+#include "Eigen/Dense"
 
 #include <oboe/Oboe.h>
 #include <TappableAudioSource.h>
@@ -37,7 +39,7 @@ public:
      * channel, the output will be interlaced.
      *
      */
-    PaperSynthSoundGenerator(int32_t sampleRate, int32_t channelCount);
+    PaperSynthSoundGenerator(int32_t sampleRate, int32_t channelCount, const FourierSeries& fourierSeries);
     ~PaperSynthSoundGenerator() = default;
 
     PaperSynthSoundGenerator(PaperSynthSoundGenerator&& other) = default;
@@ -53,6 +55,7 @@ public:
         alphaArrayWidth_ = width;
         alphaArrayHeight_ = height;
     }
+    static std::vector<float> calculateFourierWave(FourierSeries fourierSeries);
 
 private:
     std::vector<PaperSynthOscillator*> oscillators_;

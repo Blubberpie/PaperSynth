@@ -4,6 +4,12 @@
 
 #include "PaperSynthOscillator.h"
 
+#include <utility>
+
+PaperSynthOscillator::PaperSynthOscillator(std::vector<float> fourierWave) {
+    setFourierWave(std::move(fourierWave));
+}
+
 void PaperSynthOscillator::renderAudio(float *audioData, int32_t numFrames) {
     if (isWaveOn_) {
         for (int i = 0; i < numFrames; ++i) {
@@ -17,6 +23,7 @@ void PaperSynthOscillator::renderAudio(float *audioData, int32_t numFrames) {
 
             // Sine wave
             audioData[i] = sinf(phase_) * amplitude_;
+            LOGD("%f", sinf(phase_));
 
             // Triangle wave
 //            float triangle = 2.0f * ((phase_ < 0.0f) ? (0.5f + phase_) : (0.5f - phase_));
@@ -53,4 +60,8 @@ void PaperSynthOscillator::setSampleRate(int32_t sampleRate) {
 void PaperSynthOscillator::setFrequency(double frequency) {
     frequency_ = frequency;
     updatePhaseIncrement();
+}
+
+void PaperSynthOscillator::setFourierWave(std::vector<float> fourierWave) {
+    fourierWave_ = std::move(fourierWave);
 }
