@@ -15,7 +15,7 @@ PaperSynthSoundGenerator::PaperSynthSoundGenerator(
 //    lastPitchChangeTime_ = high_resolution_clock::now();
     float amplitude = 1.0f / (float)numOscs_; // TODO: make dynamic
 
-    std::vector<float> fourierWave = calculateFourierWave(fourierSeries, framesPerBurst);
+    Eigen::Array<float, 1, Eigen::Dynamic> fourierWave = calculateFourierWave(fourierSeries, framesPerBurst);
 
     for (int i = 0; i < numOscs_; ++i) {
         auto osc = new PaperSynthOscillator(fourierWave); // TODO: handle delete?? somehow?
@@ -69,7 +69,7 @@ void PaperSynthSoundGenerator::processAlphaArray(bool disableAll) {
     }
 }
 
-std::vector<float> PaperSynthSoundGenerator::calculateFourierWave(const FourierSeries& fourierSeries, int32_t n) {
+Eigen::Array<float, 1, Eigen::Dynamic> PaperSynthSoundGenerator::calculateFourierWave(const FourierSeries& fourierSeries, int32_t n) {
     float stepSize = 2.0f / n;
 
     // Initialize array of size n with values from range:
@@ -86,16 +86,13 @@ std::vector<float> PaperSynthSoundGenerator::calculateFourierWave(const FourierS
 
     for (int k = 0; k < fourierSeries.numTerms; k++) {
         auto calculatedFreq = calculateFrequency(k, xs);
-        auto cosFreq = calculatedFreq.cos();
-        auto calculatedA = cosFreq.operator*(fourierSeries.coefficientsA[k]);
+        auto calculatedA = calculatedFreq.cos().operator*(fourierSeries.coefficientsA[k]);
+        auto calculatedB = calculatedFreq.sin().operator*(fourierSeries.coefficientsB[k]);
 
-        auto sinFreq = calculatedFreq.sin();
-        auto calculatedB = sinFreq.operator*(fourierSeries.coefficientsB[k]);
-
-        ys = ys.operator+(calculatedA.operator+(calculatedB));
+        ys.operator+=(calculatedA.operator+(calculatedB));
     }
 
-    return std::vector<float>();
+    return ys;
 }
 
 Eigen::Array<float, 1, Eigen::Dynamic>

@@ -59,7 +59,7 @@ public:
         alphaArrayWidth_ = width;
         alphaArrayHeight_ = height;
     }
-    static std::vector<float> calculateFourierWave(const FourierSeries& fourierSeries, int32_t numSamples);
+    static Eigen::Array<float, 1, Eigen::Dynamic> calculateFourierWave(const FourierSeries& fourierSeries, int32_t numSamples);
 
 private:
     std::vector<PaperSynthOscillator*> oscillators_;
