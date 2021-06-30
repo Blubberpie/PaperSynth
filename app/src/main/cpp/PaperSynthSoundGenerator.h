@@ -39,7 +39,11 @@ public:
      * channel, the output will be interlaced.
      *
      */
-    PaperSynthSoundGenerator(int32_t sampleRate, int32_t channelCount, const FourierSeries& fourierSeries);
+    PaperSynthSoundGenerator(
+            int32_t sampleRate,
+            int32_t channelCount,
+            int32_t framesPerBurst,
+            const FourierSeries& fourierSeries);
     ~PaperSynthSoundGenerator() = default;
 
     PaperSynthSoundGenerator(PaperSynthSoundGenerator&& other) = default;
@@ -55,7 +59,7 @@ public:
         alphaArrayWidth_ = width;
         alphaArrayHeight_ = height;
     }
-    static std::vector<float> calculateFourierWave(FourierSeries fourierSeries);
+    static std::vector<float> calculateFourierWave(const FourierSeries& fourierSeries, int32_t numSamples);
 
 private:
     std::vector<PaperSynthOscillator*> oscillators_;
@@ -76,6 +80,7 @@ private:
     int curSweepPosition_ = 0;
 
     void processAlphaArray(bool disableAll=false);
+    static Eigen::Array<float, 1, Eigen::Dynamic> calculateFrequency(int k, Eigen::Array<float, 1, Eigen::Dynamic> xs);
 };
 
 

@@ -7,6 +7,7 @@
 PaperSynthSoundGenerator::PaperSynthSoundGenerator(
         int32_t sampleRate,
         int32_t channelCount,
+        int32_t framesPerBurst,
         const FourierSeries& fourierSeries
 )
         : TappableAudioSource(sampleRate, channelCount) {
@@ -14,7 +15,7 @@ PaperSynthSoundGenerator::PaperSynthSoundGenerator(
 //    lastPitchChangeTime_ = high_resolution_clock::now();
     float amplitude = 1.0f / (float)numOscs_; // TODO: make dynamic
 
-    std::vector<float> fourierWave = calculateFourierWave(fourierSeries);
+    std::vector<float> fourierWave = calculateFourierWave(fourierSeries, framesPerBurst);
 
     for (int i = 0; i < numOscs_; ++i) {
         auto osc = new PaperSynthOscillator(fourierWave); // TODO: handle delete?? somehow?
@@ -68,6 +69,37 @@ void PaperSynthSoundGenerator::processAlphaArray(bool disableAll) {
     }
 }
 
-std::vector<float> PaperSynthSoundGenerator::calculateFourierWave(FourierSeries fourierSeries) {
+std::vector<float> PaperSynthSoundGenerator::calculateFourierWave(const FourierSeries& fourierSeries, int32_t n) {
+    float stepSize = 2.0f / n;
+
+    // Initialize array of size n with values from range:
+    // -1 to 1 with stepSize
+    auto xs = Eigen::Array<float, 1, Eigen::Dynamic>(n);
+    float curX = -1 + stepSize;
+    for (int i = 0; i < n; i++) {
+        xs(i) = curX;
+        curX += stepSize;
+    }
+
+    // Initialize array of size n with a constant center y-value.
+    auto ys = Eigen::Array<float, 1, Eigen::Dynamic>(n).operator=(fourierSeries.a0 / 2);
+
+    for (int k = 0; k < fourierSeries.numTerms; k++) {
+        auto calculatedFreq = calculateFrequency(k, xs);
+        auto cosFreq = calculatedFreq.cos();
+        auto calculatedA = cosFreq.operator*(fourierSeries.coefficientsA[k]);
+
+        auto sinFreq = calculatedFreq.sin();
+        auto calculatedB = sinFreq.operator*(fourierSeries.coefficientsB[k]);
+
+        ys = ys.operator+(calculatedA.operator+(calculatedB));
+    }
+
     return std::vector<float>();
+}
+
+Eigen::Array<float, 1, Eigen::Dynamic>
+PaperSynthSoundGenerator::calculateFrequency(int k, Eigen::Array<float, 1, Eigen::Dynamic> xs) {
+    float timesVal = M_PI * (k + 1);
+    return xs.operator*(timesVal);
 }

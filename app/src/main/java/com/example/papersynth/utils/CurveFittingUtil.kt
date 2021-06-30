@@ -37,17 +37,17 @@ object CurveFittingUtil {
         val arrB = mk.empty<Float, D1>(NUM_TERMS)
 
         for (k in 0 until NUM_TERMS) {
-            arrA[k] = calculateFrequency(k, arrX, period)
+            val calculatedFreq = calculateFrequency(k, arrX, period)
+            arrA[k] = calculatedFreq
                 .map { x -> cos(x) }
                 .times(f)
                 .sum() * step // normalize
 
-            arrB[k] = calculateFrequency(k, arrX, period)
+            arrB[k] = calculatedFreq
                 .map { x -> sin(x) }
                 .times(f)
                 .sum() * step
         }
-
         return FourierSeries(arrA, arrB, 40, f.sum() * step)
     }
 
@@ -58,11 +58,12 @@ object CurveFittingUtil {
     ): NDArray<Float, D1> {
         var calculatedYs = ys
         for (k in 0 until fourierSeries.numTerms) {
+            val calculatedFreq = calculateFrequency(k, xs)
             calculatedYs = calculatedYs.plus(
-                calculateFrequency(k, xs)
+                calculatedFreq
                     .map { x -> cos(x) }
                     .map { x -> x * fourierSeries.coefficientsA[k]}
-                        + calculateFrequency(k, xs)
+                        + calculatedFreq
                     .map { x -> sin(x) }
                     .map { x -> x * fourierSeries.coefficientsB[k]}
             )

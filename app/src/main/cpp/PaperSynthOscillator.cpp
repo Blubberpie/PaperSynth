@@ -23,7 +23,6 @@ void PaperSynthOscillator::renderAudio(float *audioData, int32_t numFrames) {
 
             // Sine wave
             audioData[i] = sinf(phase_) * amplitude_;
-            LOGD("%f", sinf(phase_));
 
             // Triangle wave
 //            float triangle = 2.0f * ((phase_ < 0.0f) ? (0.5f + phase_) : (0.5f - phase_));

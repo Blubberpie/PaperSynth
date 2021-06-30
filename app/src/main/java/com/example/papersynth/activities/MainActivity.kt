@@ -78,7 +78,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     @Override
     override fun onResume() {
         super.onResume()
-        Log.d("test", "here")
         create(this, fourierSeries)
         setChannelCount(2) // stereo
         val result = start()
