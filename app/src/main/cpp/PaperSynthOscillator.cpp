@@ -14,27 +14,10 @@ void PaperSynthOscillator::renderAudio(float *audioData, int32_t numFrames) {
     if (isWaveOn_) {
         for (int i = 0; i < numFrames; ++i) {
 
-            // Square wave
-//            if (phase_ <= PI) {
-//                audioData[i] = -amplitude_;
-//            } else {
-//                audioData[i] = amplitude_;
-//            }
-
-            // Sine wave
-            audioData[i] = sinf(phase_) * amplitude_;
-//            LOGD("%f", sinf(phase_));
-
-            // Triangle wave
-//            float triangle = 2.0f * ((phase_ < 0.0f) ? (0.5f + phase_) : (0.5f - phase_));
-//            audioData[i] = triangle * amplitude_;
-
-            // Sawtooth
-//            if (phase_ <= PI) {
-//                audioData[i] += amplitude_;
-//            } else {
-//                audioData[i] += -amplitude_;
-//            }
+            int pos = static_cast<int>(round(1024 * (phase_ / TWO_PI)));
+            if (pos < 0) pos = 0;
+            else if (pos >= 1024) pos = 1023;
+            audioData[i] = fourierWave_(pos) * amplitude_;
 
             phase_ += phaseIncrement_;
             if (phase_ > TWO_PI) phase_ -= TWO_PI;
@@ -42,10 +25,6 @@ void PaperSynthOscillator::renderAudio(float *audioData, int32_t numFrames) {
     } else {
         memset(audioData, 0, sizeof(float) * numFrames);
     }
-}
-
-void PaperSynthOscillator::updatePhaseIncrement() {
-    phaseIncrement_.store((TWO_PI * frequency_) / static_cast<double>(sampleRate_));
 }
 
 void PaperSynthOscillator::setWaveOn(bool isWaveOn) {
@@ -64,4 +43,10 @@ void PaperSynthOscillator::setFrequency(double frequency) {
 
 void PaperSynthOscillator::setFourierWave(Eigen::Array<float, 1, Eigen::Dynamic> fourierWave) {
     fourierWave_ = std::move(fourierWave);
+}
+
+/// PRIVATE ///
+
+void PaperSynthOscillator::updatePhaseIncrement() {
+    phaseIncrement_.store((TWO_PI * frequency_) / static_cast<double>(sampleRate_));
 }

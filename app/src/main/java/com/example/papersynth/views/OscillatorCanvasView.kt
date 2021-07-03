@@ -81,7 +81,7 @@ class OscillatorCanvasView : View {
     }
 
     private val numStepsFourier = NUM_SAMPLES * 2
-    private val stepSizeFourier = 2f / numStepsFourier
+    private val stepSizeFourier = 1f / numStepsFourier
     private val arrXsFourier: NDArray<Float, D1> = CurveFittingUtil.generateXs(stepSizeFourier)
     private var fourierSampleSpreadAmount = 0f
     private var firstTime = true

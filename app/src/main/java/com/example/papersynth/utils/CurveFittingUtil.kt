@@ -21,12 +21,13 @@ import kotlin.math.sin
 object CurveFittingUtil {
 
     private const val NUM_TERMS = 40
+    private const val TWO_PI = 2 * PI.toFloat()
 
     fun fit(data: FloatArray, n: Int): FourierSeries {
-        val step: Float = 2f / n
-        val period: Float = PI.toFloat()
+        val step: Float = 1f / n
+        val period: Float = TWO_PI
 
-        // Initialize array of size n from -PI to PI
+        // Initialize array of size n from 0 to TWO_PI
         val arrX = generateXs(step, period)
         val f = mk.ndarray(data)
 
@@ -76,9 +77,9 @@ object CurveFittingUtil {
         return mk.empty<Float, D1>(n).map { firstCoefficient / 2 }
     }
 
-    fun generateXs(stepSize: Float, period: Float=1f): NDArray<Float, D1> {
+    fun generateXs(stepSize: Float, period: Float=TWO_PI): NDArray<Float, D1> {
         return mk
-            .arange<Float>(-1, 1, stepSize.toDouble())
+            .arange<Float>(0, 1, stepSize.toDouble())
             .map { x: Float -> (x + stepSize) * period }
     }
 
@@ -102,7 +103,7 @@ object CurveFittingUtil {
 
     // PRIVATE //
 
-    private fun calculateFrequency(k: Int, xs: NDArray<Float, D1>, period: Float=1f): NDArray<Float, D1> {
-        return xs.map { x -> PI.toFloat() * (k + 1) * x / period}
+    private fun calculateFrequency(k: Int, xs: NDArray<Float, D1>, period: Float=TWO_PI): NDArray<Float, D1> {
+        return xs.map { x -> PI.toFloat() * (k + 1) * x / period }
     }
 }

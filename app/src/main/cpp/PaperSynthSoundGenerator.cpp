@@ -7,7 +7,6 @@
 PaperSynthSoundGenerator::PaperSynthSoundGenerator(
         int32_t sampleRate,
         int32_t channelCount,
-        int32_t framesPerBurst,
         const FourierSeries& fourierSeries
 )
         : TappableAudioSource(sampleRate, channelCount) {
@@ -15,7 +14,7 @@ PaperSynthSoundGenerator::PaperSynthSoundGenerator(
 //    lastPitchChangeTime_ = high_resolution_clock::now();
     float amplitude = 1.0f / (float)numOscs_; // TODO: make dynamic
 
-    Eigen::Array<float, 1, Eigen::Dynamic> fourierWave = calculateFourierWave(fourierSeries, framesPerBurst);
+    Eigen::Array<float, 1, Eigen::Dynamic> fourierWave = calculateFourierWave(fourierSeries, 1024);
 
     for (int i = 0; i < numOscs_; ++i) {
         auto osc = new PaperSynthOscillator(fourierWave); // TODO: handle delete?? somehow?
@@ -69,23 +68,24 @@ void PaperSynthSoundGenerator::processAlphaArray(bool disableAll) {
     }
 }
 
-Eigen::Array<float, 1, Eigen::Dynamic> PaperSynthSoundGenerator::calculateFourierWave(const FourierSeries& fourierSeries, int32_t n) {
-    float stepSize = 2.0f / n;
+Eigen::Array<float, 1, Eigen::Dynamic> PaperSynthSoundGenerator::calculateFourierWave(const FourierSeries& fourierSeries, int n) {
+    float stepSize = 1.0f / static_cast<float>(n);
+    float period = M_PI * 2;
 
     // Initialize array of size n with values from range:
-    // -1 to 1 with stepSize
+    // 0 to period with stepSize
     auto xs = Eigen::Array<float, 1, Eigen::Dynamic>(n);
-    float curX = -1 + stepSize;
+    float curX = 0 + stepSize;
     for (int i = 0; i < n; i++) {
-        xs(i) = curX;
+        xs(i) = curX * period;
         curX += stepSize;
     }
 
-    // Initialize array of size n with a constant center y-value.
+    // Initialize array of size n with a constant (A0 / 2)
     auto ys = Eigen::Array<float, 1, Eigen::Dynamic>(n).operator=(fourierSeries.a0 / 2);
 
     for (int k = 0; k < fourierSeries.numTerms; k++) {
-        auto calculatedFreq = calculateFrequency(k, xs);
+        auto calculatedFreq = calculateFrequency(k, xs, period);
         auto calculatedA = calculatedFreq.cos().operator*(fourierSeries.coefficientsA[k]);
         auto calculatedB = calculatedFreq.sin().operator*(fourierSeries.coefficientsB[k]);
 
@@ -96,7 +96,7 @@ Eigen::Array<float, 1, Eigen::Dynamic> PaperSynthSoundGenerator::calculateFourie
 }
 
 Eigen::Array<float, 1, Eigen::Dynamic>
-PaperSynthSoundGenerator::calculateFrequency(int k, Eigen::Array<float, 1, Eigen::Dynamic> xs) {
-    float timesVal = M_PI * (k + 1);
+PaperSynthSoundGenerator::calculateFrequency(int k, const Eigen::Array<float, 1, Eigen::Dynamic>& xs, float period) {
+    float timesVal = M_PI * (k + 1) / period;
     return xs.operator*(timesVal);
 }

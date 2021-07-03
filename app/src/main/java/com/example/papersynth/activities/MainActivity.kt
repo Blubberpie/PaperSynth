@@ -56,6 +56,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             .add(R.id.fragment_container_view, CanvasFragment())
             .commit()
 
+        // TODO: save coefficients in json
         val oscData: FloatArray? = FileUtil.readOscillatorFromFile(this as Activity, "my_oscillators.json")
         if (oscData == null) {
             val oscDataNew = FloatArray(NUM_SAMPLES)

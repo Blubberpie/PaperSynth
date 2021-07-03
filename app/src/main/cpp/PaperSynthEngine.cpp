@@ -30,7 +30,6 @@ oboe::Result PaperSynthEngine::start() {
         audioSource_ =  std::make_shared<PaperSynthSoundGenerator>(
                 stream_->getSampleRate(),
                 stream_->getChannelCount(),
-                stream_->getFramesPerBurst(),
                 fourierSeries_);
         latencyCallback_->setSource(std::dynamic_pointer_cast<IRenderableAudio>(audioSource_));
 

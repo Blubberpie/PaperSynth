@@ -16,6 +16,9 @@
 #include "FourierSeries.h"
 #include "Eigen/Dense"
 
+using std::chrono::high_resolution_clock; // TODO REMOVE
+using std::chrono::duration;
+
 constexpr double FREQUENCY_DEFAULT = 440.0;
 constexpr int32_t SAMPLE_RATE_DEFAULT = 48000;
 constexpr double PI = M_PI;

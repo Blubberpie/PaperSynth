@@ -15,6 +15,7 @@
 #include <MonoToStereo.h>
 #include <chrono>
 #include <vector>
+#include <cmath>
 
 using std::chrono::high_resolution_clock;
 using std::chrono::duration;
@@ -42,7 +43,6 @@ public:
     PaperSynthSoundGenerator(
             int32_t sampleRate,
             int32_t channelCount,
-            int32_t framesPerBurst,
             const FourierSeries& fourierSeries);
     ~PaperSynthSoundGenerator() = default;
 
@@ -59,7 +59,7 @@ public:
         alphaArrayWidth_ = width;
         alphaArrayHeight_ = height;
     }
-    static Eigen::Array<float, 1, Eigen::Dynamic> calculateFourierWave(const FourierSeries& fourierSeries, int32_t numSamples);
+    static Eigen::Array<float, 1, Eigen::Dynamic> calculateFourierWave(const FourierSeries& fourierSeries, int n);
 
 private:
     std::vector<PaperSynthOscillator*> oscillators_;
@@ -80,7 +80,7 @@ private:
     int curSweepPosition_ = 0;
 
     void processAlphaArray(bool disableAll=false);
-    static Eigen::Array<float, 1, Eigen::Dynamic> calculateFrequency(int k, Eigen::Array<float, 1, Eigen::Dynamic> xs);
+    static Eigen::Array<float, 1, Eigen::Dynamic> calculateFrequency(int k, const Eigen::Array<float, 1, Eigen::Dynamic>& xs, float period);
 };
 
 
