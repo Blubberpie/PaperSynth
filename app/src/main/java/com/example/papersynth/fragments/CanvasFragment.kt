@@ -42,6 +42,7 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
                     val alphaArray = canvasView.getAlphaArray()
                     PlaybackEngine.setAlphaArray(alphaArray)
                 }
+                canvasView.sweep(this.isOn)
                 PlaybackEngine.setToneOn(this.isOn)
             }
 //            R.id.btn_clear -> { // Save bitmap

@@ -96,6 +96,7 @@ class OscillatorCanvasView : View {
     // TODO: onsizechanged is this a good thing?
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
         super.onSizeChanged(width, height, oldWidth, oldHeight)
+        if (::mainBitmap.isInitialized) mainBitmap.recycle()
 
         try {
             val activity: FragmentActivity = context as FragmentActivity
@@ -118,7 +119,6 @@ class OscillatorCanvasView : View {
         fourierSampleSpreadAmount = canvasWidth / numStepsFourier
         generateGridLines()
 
-        if (::mainBitmap.isInitialized) mainBitmap.recycle()
         mainBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         mainCanvas = Canvas(mainBitmap)
     }
