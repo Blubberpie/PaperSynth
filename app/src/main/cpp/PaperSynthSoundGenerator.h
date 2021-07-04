@@ -20,7 +20,7 @@
 using std::chrono::high_resolution_clock;
 using std::chrono::duration;
 
-const double MAXIMUM_FREQUENCY = 16744.036179238312619382; // very high D
+const double MAXIMUM_FREQUENCY = 8372.0180896191563096911; // C9
 const double MINIMUM_FREQUENCY = 55.0; // very low A
 
 const double INTERVAL_PERFECT_FIFTH = pow(2, 7.0/12);
@@ -67,7 +67,7 @@ private:
     MonoToStereo converter_ = MonoToStereo(&mixer_);
     IRenderableAudio *outputStage_; // This will point to either the mixer or converter, so it needs to be raw
 
-    int numOscs_ = 108;
+    int numOscs_ = 88;
 
     std::vector<int> alphaArray_;
     int alphaArrayWidth_ = 0;

@@ -19,8 +19,8 @@ class CanvasView : View {
     private lateinit var mainBitmap: Bitmap
 
     private val brushColor = ResourcesCompat.getColor(resources, R.color.brushL, null)
-    private val resizedWidth = 335 // todo: this is really bad coding lol
-    private val resizedHeight = 108
+    private val resizedWidth = 300 // todo: this is really bad coding lol
+    private val resizedHeight = 88
     private var motionTouchEventX = 0f
     private var motionTouchEventY = 0f
     private var currentX = 0f

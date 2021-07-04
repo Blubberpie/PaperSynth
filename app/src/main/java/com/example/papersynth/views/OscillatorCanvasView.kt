@@ -7,7 +7,6 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
@@ -22,13 +21,10 @@ import org.jetbrains.kotlinx.multik.ndarray.data.NDArray
 import org.jetbrains.kotlinx.multik.ndarray.operations.forEachIndexed
 import java.io.FileNotFoundException
 import kotlin.math.PI
-import kotlin.math.sin
 import kotlin.math.roundToInt
 
 private const val NUM_SAMPLES = 256
 private const val HALF_WAVE_CYCLE = NUM_SAMPLES / (2 * PI.toFloat())
-private const val MAX_SAMPLE_VAL = 1f
-private const val MIN_SAMPLE_VAL = 0f
 private const val CANVAS_PADDING = 15f
 private const val GRID_STROKE_WIDTH = 1f
 private const val GRID_STROKE_ACCENT_WIDTH = 3f
@@ -87,6 +83,9 @@ class OscillatorCanvasView : View {
     private var firstTime = true
 
     private val fourierPath = Path()
+    private val gridLines = Path()
+    private val gridLinesThick = Path()
+    private val textsToDraw: ArrayList<TextToDraw> = ArrayList()
 
     private var sampleList = FloatArray(NUM_SAMPLES)
 
@@ -117,6 +116,7 @@ class OscillatorCanvasView : View {
         dotSpreadAmount = canvasWidth / 256
         gridSpreadAmount = canvasWidth / numGridSpaces
         fourierSampleSpreadAmount = canvasWidth / numStepsFourier
+        generateGridLines()
 
         if (::mainBitmap.isInitialized) mainBitmap.recycle()
         mainBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
@@ -222,44 +222,50 @@ class OscillatorCanvasView : View {
     }
 
     private fun drawCanvasGrid(canvas: Canvas) {
+        setAccentedGridLine(false)
+        canvas.drawPath(gridLines, gridBrush)
+        setAccentedGridLine(true)
+        canvas.drawPath(gridLinesThick, gridBrush)
+        for (ttd in textsToDraw) {
+            canvas.drawText(ttd.text, ttd.x, ttd.y, gridTextBrush)
+        }
+    }
+
+    private fun generateGridLines() {
         val yCenter = (canvasHeight + (2 * CANVAS_PADDING)) / 2
 
         // Horizontal center line
-        canvas.drawLine(
-            CANVAS_PADDING,
-            yCenter,
-            canvasWidth + CANVAS_PADDING,
-            yCenter,
-            gridBrush
-        )
+        val horizontalLinePath = Path()
+        horizontalLinePath.setLastPoint(CANVAS_PADDING, yCenter)
+        horizontalLinePath.lineTo(canvasWidth + CANVAS_PADDING, yCenter)
+
+        // Cache it
+        gridLines.addPath(horizontalLinePath)
 
         // Vertical lines
+        val verticalLinePath = Path()
         for (i in 0 until numGridSpaces + 1) {
+            verticalLinePath.reset()
             val curSampleCount = i * gridSpaceLength
             val sectionLength = NUM_SAMPLES / numSections
             val xPos = (i * gridSpreadAmount) + CANVAS_PADDING
 
             if (curSampleCount % sectionLength == 0 || i == 0) {
                 if (i != numGridSpaces + 1) {
-                    canvas.drawText(
-                        curSampleCount.toString(),
+                    textsToDraw.add(
+                        TextToDraw(curSampleCount.toString(),
                         xPos + CANVAS_PADDING,
-                        CANVAS_PADDING + gridTextBrush.textSize,
-                        gridTextBrush
+                        CANVAS_PADDING + gridTextBrush.textSize)
                     )
                 }
-                setAccentedGridLine(true)
+                verticalLinePath.setLastPoint(xPos, CANVAS_PADDING)
+                verticalLinePath.lineTo(xPos, canvasHeight + CANVAS_PADDING)
+                gridLinesThick.addPath(verticalLinePath) // cache
             } else {
-                setAccentedGridLine(false)
+                verticalLinePath.setLastPoint(xPos, CANVAS_PADDING)
+                verticalLinePath.lineTo(xPos, canvasHeight + CANVAS_PADDING)
+                gridLines.addPath(verticalLinePath) // cache
             }
-
-            canvas.drawLine(
-                xPos,
-                CANVAS_PADDING,
-                xPos,
-                canvasHeight + CANVAS_PADDING,
-                gridBrush
-            )
         }
     }
 
