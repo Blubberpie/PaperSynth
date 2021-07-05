@@ -1,8 +1,10 @@
 package com.example.papersynth.utils
 
 import android.Manifest
+import android.R.attr.path
 import android.app.Activity
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Environment
 import android.util.JsonReader
 import android.util.JsonWriter
@@ -11,6 +13,7 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.FragmentActivity
 import com.example.papersynth.dataclasses.Oscillator
 import java.io.*
+
 
 object FileUtil {
 
@@ -90,6 +93,29 @@ object FileUtil {
         FileOutputStream(File(file, filename)).use { fos ->
             data.compress(Bitmap.CompressFormat.PNG, 100, fos)
         }
+    }
+
+    fun readCanvasFromPath(
+        fragmentActivity: FragmentActivity,
+        fullPath: String?
+    ): Bitmap? {
+        fullPath?.let {
+            ActivityCompat.requestPermissions(fragmentActivity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
+
+            val dir = File(fragmentActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "PaperSynth")
+            val filename: String = File(fullPath).name
+            val file = File(dir, filename)
+            println(file.toString())
+            if (!file.exists()) {
+                Log.e("File error", "File doesn't exist!")
+            } else {
+                FileInputStream(file).use { fis ->
+                    val bm = BitmapFactory.decodeStream(fis)
+                    return(bm)
+                }
+            }
+        }
+        return null
     }
 
     /// PRIVATE ///

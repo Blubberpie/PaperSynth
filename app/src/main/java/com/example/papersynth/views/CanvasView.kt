@@ -77,6 +77,7 @@ class CanvasView : View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        canvas.drawBitmap(mainBitmap, 0f, 0f, null)
         if (drawGrid) {
             canvas.drawPath(gridLines, gridBrush)
         }
@@ -236,5 +237,21 @@ class CanvasView : View {
     fun sweep(willSweep: Boolean) {
         isSweeping = willSweep
         lastSweepTickTime = System.currentTimeMillis()
+    }
+
+    fun toggleGrid() {
+        drawGrid = !drawGrid
+    }
+
+    fun applyLoadedBitmap(bm: Bitmap?) {
+        bm?.let {
+            if (::mainBitmap.isInitialized) {
+                clearCanvas()
+                mainBitmap.recycle()
+                mainBitmap = bm.copy(Bitmap.Config.ARGB_8888, true)
+                mainCanvas = Canvas(mainBitmap)
+                invalidate()
+            }
+        }
     }
 }

@@ -20,10 +20,30 @@
         android:textColor="@color/canvasD"
         android:textSize="11sp"
         app:backgroundTint="@color/elementD"
+        app:icon="@android:drawable/ic_menu_save"
+        app:iconTint="@color/mainD"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_weight="0.5"
         app:layout_constraintStart_toEndOf="@+id/btn_load_canvas"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btn_toggle_grid"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:insetTop="0dp"
+        android:insetBottom="8dp"
+        android:text="SHOW/HIDE GRID"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textColor="@color/brushL"
+        android:textSize="12sp"
+        app:backgroundTint="@color/elementD"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight="0.5"
+        app:layout_constraintStart_toEndOf="@+id/fragment_container_view"
+        app:layout_constraintTop_toBottomOf="@+id/btn_save_canvas" />
 
     <Button
         android:id="@+id/btn_load_canvas"
@@ -34,15 +54,17 @@
         android:layout_marginEnd="4dp"
         android:insetTop="0dp"
         android:insetBottom="8dp"
-        android:text="LOAD"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         android:textColor="@color/canvasD"
         android:textSize="11sp"
         app:backgroundTint="@color/elementD"
+        app:icon="@android:drawable/ic_menu_upload"
+        app:iconTint="@color/mainD"
         app:layout_constraintEnd_toStartOf="@+id/btn_save_canvas"
         app:layout_constraintHorizontal_weight="0.5"
         app:layout_constraintStart_toEndOf="@+id/fragment_container_view"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:rippleColor="@color/brushL" />
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_container_view"
@@ -71,6 +93,8 @@
         android:insetBottom="0dp"
         android:text="PLAY"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@color/brushL"
+        android:textStyle="bold"
         app:backgroundTint="@color/greenD"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -86,6 +110,8 @@
         android:insetBottom="0dp"
         android:text="CLEAR"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@color/brushL"
+        android:textStyle="bold"
         app:backgroundTint="@color/elementD"
         app:layout_constraintBottom_toTopOf="@+id/btn_play_wave"
         app:layout_constraintEnd_toEndOf="parent"
