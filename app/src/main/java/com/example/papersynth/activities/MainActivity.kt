@@ -56,6 +56,64 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             .add(R.id.fragment_container_view, CanvasFragment())
             .commit()
 
+        applyWave()
+
+        val oscillatorActivityButton = findViewById<Button>(R.id.btn_oscillator_activity)
+        oscillatorActivityButton.setOnClickListener(this)
+        val applyWaveButton = findViewById<Button>(R.id.btn_apply_wave)
+        applyWaveButton.setOnClickListener(this)
+    }
+
+    /*
+    * Creating engine in onResume() and destroying in onPause() so the stream retains exclusive
+    * mode only while in focus. This allows other apps to reclaim exclusive stream mode.
+    */
+    @Override
+    override fun onResume() {
+        super.onResume()
+        createAndStartEngine()
+    }
+    @Override
+    override fun onPause() {
+        stopAndDeleteEngine()
+        super.onPause()
+    }
+
+    @Override
+    override fun onClick(v: View?) {
+        when (v?.id) {
+            R.id.btn_oscillator_activity -> {
+                openOscillatorCanvas()
+            }
+            R.id.btn_apply_wave -> {
+                restartAll()
+            }
+        }
+    }
+
+    private fun openOscillatorCanvas() {
+        val oscillatorCanvasIntent = Intent(this@MainActivity, OscillatorCanvasActivity::class.java)
+        startActivity(oscillatorCanvasIntent)
+    }
+
+    private fun createAndStartEngine() {
+        create(this, fourierSeries)
+        setChannelCount(2) // stereo
+        val result = start()
+        if (result != 0) {
+            println("Error opening stream = $result")
+        }
+    }
+
+    private fun stopAndDeleteEngine() {
+        val result = stop()
+        if (result != 0) {
+            println("Error stopping stream = $result")
+        }
+        delete()
+    }
+
+    private fun applyWave() {
         // TODO: save coefficients in json
         val oscData: FloatArray? = FileUtil.readOscillatorFromFile(this as Activity, "my_oscillators.json")
         if (oscData == null) {
@@ -67,47 +125,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         } else {
             fourierSeries = CurveFittingUtil.fit(oscData, NUM_SAMPLES)
         }
-
-        val oscillatorActivityButton = findViewById<Button>(R.id.btn_oscillator_activity)
-        oscillatorActivityButton.setOnClickListener(this)
     }
 
-    /*
-    * Creating engine in onResume() and destroying in onPause() so the stream retains exclusive
-    * mode only while in focus. This allows other apps to reclaim exclusive stream mode.
-    */
-    @Override
-    override fun onResume() {
-        super.onResume()
-        create(this, fourierSeries)
-        setChannelCount(2) // stereo
-        val result = start()
-        if (result != 0) {
-            println("Error opening stream = $result")
-        }
-    }
-
-    @Override
-    override fun onPause() {
-        val result = stop()
-        if (result != 0) {
-            println("Error stopping stream = $result")
-        }
-        delete()
-        super.onPause()
-    }
-
-    @Override
-    override fun onClick(v: View?) {
-        when (v?.id) {
-            R.id.btn_oscillator_activity -> {
-                openOscillatorCanvas()
-            }
-        }
-    }
-
-    private fun openOscillatorCanvas() {
-        val oscillatorCanvasIntent = Intent(this@MainActivity, OscillatorCanvasActivity::class.java)
-        startActivity(oscillatorCanvasIntent)
+    private fun restartAll() {
+        println("here")
+        applyWave()
+        stopAndDeleteEngine()
+        createAndStartEngine()
     }
 }
