@@ -77,10 +77,10 @@ class CanvasView : View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawBitmap(mainBitmap, 0f, 0f, null)
         if (drawGrid) {
             canvas.drawPath(gridLines, gridBrush)
         }
+        canvas.drawBitmap(mainBitmap, 0f, 0f, null)
         canvas.drawPath(drawing, brush)
         canvas.drawPath(curPath, brush)
         drawSweeper(canvas)
