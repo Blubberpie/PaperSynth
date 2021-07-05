@@ -17,7 +17,7 @@
         android:insetTop="0dp"
         android:insetBottom="0dp"
         android:text="SAVE WAVE"
-        app:backgroundTint="@color/elementD"
+        app:backgroundTint="@color/greenD"
         app:layout_constraintBottom_toTopOf="@+id/osc_canvas_guideline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -32,7 +32,7 @@
         android:insetTop="0dp"
         android:insetBottom="0dp"
         android:text="RESET WAVE"
-        app:backgroundTint="@color/elementD"
+        app:backgroundTint="@color/redD"
         app:layout_constraintBottom_toTopOf="@+id/osc_canvas_guideline"
         app:layout_constraintEnd_toStartOf="@+id/btn_save_oscillator"
         app:layout_constraintTop_toTopOf="parent" />

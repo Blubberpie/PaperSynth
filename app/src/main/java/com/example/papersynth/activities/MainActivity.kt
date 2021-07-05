@@ -128,7 +128,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun restartAll() {
-        println("here")
         applyWave()
         stopAndDeleteEngine()
         createAndStartEngine()

@@ -1,14 +1,16 @@
 package com.example.papersynth.fragments
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.fragment.app.Fragment
 import com.example.papersynth.PlaybackEngine
 import com.example.papersynth.R
+import com.example.papersynth.utils.FileUtil.writeCanvasToFile
 import com.example.papersynth.views.CanvasView
+import java.util.*
 
 class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener {
 
@@ -45,12 +47,13 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
                 canvasView.sweep(this.isOn)
                 PlaybackEngine.setToneOn(this.isOn)
             }
-//            R.id.btn_clear -> { // Save bitmap
-//                val bitmap = canvasView.getBitmap()
-//                activity?.let { fragmentActivity ->
-//                    writeCanvasToFile(fragmentActivity, "test.png", bitmap)
-//                }
-//            }
+            R.id.btn_save_canvas -> {
+                val bitmap = canvasView.getBitmap()
+                activity?.let { fragmentActivity ->
+                    val now = Calendar.getInstance().time.toString()
+                    writeCanvasToFile(fragmentActivity, "$now.png", bitmap)
+                }
+            }
         }
     }
 
@@ -59,5 +62,9 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
         clearButton?.setOnClickListener(this)
         val waveButton = activity?.findViewById<Button>(R.id.btn_play_wave)
         waveButton?.setOnClickListener(this)
+        val saveButton = activity?.findViewById<Button>(R.id.btn_save_canvas)
+        saveButton?.setOnClickListener(this)
+        val loadButton = activity?.findViewById<Button>(R.id.btn_load_canvas)
+        loadButton?.setOnClickListener(this)
     }
 }

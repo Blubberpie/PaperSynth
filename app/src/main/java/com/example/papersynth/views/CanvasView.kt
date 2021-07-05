@@ -212,9 +212,7 @@ class CanvasView : View {
     fun getBitmap(): Bitmap {
         this.setBackgroundColor(Color.TRANSPARENT)
         draw(mainCanvas)
-        val resizedBitmap = getResizedBitmap(mainBitmap)
-        convertToAlphaArray(resizedBitmap)
-        return resizedBitmap
+        return mainBitmap
     }
 
     // TODO: some mechanism to detect if bitmap has changed so that PSE doesn't have to process again

@@ -6,6 +6,44 @@
     android:layout_height="match_parent"
     tools:context=".activities.MainActivity">
 
+    <Button
+        android:id="@+id/btn_save_canvas"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:insetTop="0dp"
+        android:insetBottom="8dp"
+        android:text="SAVE"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textColor="@color/canvasD"
+        android:textSize="11sp"
+        app:backgroundTint="@color/elementD"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight="0.5"
+        app:layout_constraintStart_toEndOf="@+id/btn_load_canvas"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btn_load_canvas"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="4dp"
+        android:insetTop="0dp"
+        android:insetBottom="8dp"
+        android:text="LOAD"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textColor="@color/canvasD"
+        android:textSize="11sp"
+        app:backgroundTint="@color/elementD"
+        app:layout_constraintEnd_toStartOf="@+id/btn_save_canvas"
+        app:layout_constraintHorizontal_weight="0.5"
+        app:layout_constraintStart_toEndOf="@+id/fragment_container_view"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_container_view"
         android:name="com.example.papersynth.fragments.CanvasFragment"
@@ -23,7 +61,7 @@
         tools:layout="@layout/fragment_canvas" />
 
     <Button
-        android:id="@+id/btn_clear"
+        android:id="@+id/btn_play_wave"
         android:layout_width="0dp"
         android:layout_height="80dp"
         android:layout_marginStart="8dp"
@@ -31,25 +69,25 @@
         android:layout_marginBottom="8dp"
         android:insetTop="8dp"
         android:insetBottom="0dp"
-        android:text="CLEAR"
+        android:text="PLAY"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:backgroundTint="@color/elementD"
+        app:backgroundTint="@color/greenD"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/canvas_splitter" />
 
     <Button
-        android:id="@+id/btn_play_wave"
+        android:id="@+id/btn_clear"
         android:layout_width="0dp"
         android:layout_height="80dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:insetTop="8dp"
         android:insetBottom="0dp"
-        android:text="PLAY"
+        android:text="CLEAR"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:backgroundTint="@color/elementD"
-        app:layout_constraintBottom_toTopOf="@+id/btn_clear"
+        app:layout_constraintBottom_toTopOf="@+id/btn_play_wave"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@+id/fragment_container_view" />
@@ -64,9 +102,10 @@
         android:insetBottom="0dp"
         android:text="EDIT WAVE"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textColor="@color/canvasD"
         android:textSize="10sp"
-        app:backgroundTint="@color/greenD"
-        app:layout_constraintBottom_toTopOf="@+id/btn_play_wave"
+        app:backgroundTint="@color/yellowD"
+        app:layout_constraintBottom_toTopOf="@+id/btn_clear"
         app:layout_constraintEnd_toStartOf="@+id/btn_apply_wave"
         app:layout_constraintHorizontal_weight="0.5"
         app:layout_constraintStart_toEndOf="@+id/fragment_container_view" />
@@ -81,9 +120,10 @@
         android:insetBottom="0dp"
         android:text="APPLY WAVE"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textColor="@color/canvasD"
         android:textSize="10sp"
-        app:backgroundTint="@color/elementD"
-        app:layout_constraintBottom_toTopOf="@+id/btn_play_wave"
+        app:backgroundTint="@color/tealD"
+        app:layout_constraintBottom_toTopOf="@+id/btn_clear"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_weight="0.5"
         app:layout_constraintStart_toEndOf="@+id/btn_oscillator_activity" />
