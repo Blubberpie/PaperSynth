@@ -9,10 +9,10 @@ import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.alpha
 import com.example.papersynth.R
-import com.example.papersynth.dataclasses.AlphaArray
+import com.example.papersynth.dataclasses.PixelsArray
 import kotlin.math.abs
 
-private const val STROKE_WIDTH = 12f
+private const val STROKE_WIDTH = 16f
 
 class CanvasView : View {
     private lateinit var mainCanvas: Canvas
@@ -56,14 +56,14 @@ class CanvasView : View {
         strokeWidth = 2f
     }
 
-    private val drawing: ArrayList<Stroke> = ArrayList() // the drawing so far
-    private val curPath = Stroke(Path(), brush) // current drawing
-    private val gridLines = Path()
-
     private data class Stroke(
         var path: Path,
         var paint: Paint
     )
+
+    private val drawing: ArrayList<Stroke> = ArrayList() // the drawing so far
+    private val curPath = Stroke(Path(), brush) // current drawing
+    private val gridLines = Path()
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -224,12 +224,13 @@ class CanvasView : View {
     }
 
     // TODO: some mechanism to detect if bitmap has changed so that PSE doesn't have to process again
-    fun getAlphaArray(): AlphaArray {
+    fun getPixelsArray(): PixelsArray {
         this.setBackgroundColor(Color.TRANSPARENT)
         draw(mainCanvas)
-        val resizedBitmap = getResizedBitmap(mainBitmap)
-        return AlphaArray(
-            convertToAlphaArray(resizedBitmap),
+        val pixels = IntArray(resizedWidth * resizedHeight)
+        getResizedBitmap(mainBitmap).getPixels(pixels, 0, resizedWidth, 0, 0, resizedWidth, resizedHeight)
+        return PixelsArray(
+            pixels,
             resizedWidth,
             resizedHeight)
     }
@@ -265,7 +266,9 @@ class CanvasView : View {
     fun setCurrentColor(color: Int) {
         brushColor = color
         brush.color = brushColor
+        brush.isAntiAlias = true
     }
+
     fun getCurrentColor(): Int {
         return brushColor
     }

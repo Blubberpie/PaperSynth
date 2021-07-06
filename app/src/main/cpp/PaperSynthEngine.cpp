@@ -171,9 +171,9 @@ oboe::Result PaperSynthEngine::openPlaybackStream() {
     return result;
 }
 
-void PaperSynthEngine::setAudioSourceAlphaArray(std::vector<int> alphaArray, int width, int height) {
+void PaperSynthEngine::setAudioSourcePixelsArray(std::vector<int> pixelsArray, int width, int height) {
     if (audioSource_) {
-        audioSource_->setAlphaArray(std::move(alphaArray));
-        audioSource_->setAlphaArrayDimensions(width, height);
+        audioSource_->setPixelsArray(std::move(pixelsArray));
+        audioSource_->setPixelsArrayDimensions(width, height);
     }
 }

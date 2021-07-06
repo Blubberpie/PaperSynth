@@ -209,19 +209,19 @@ Java_com_example_papersynth_PlaybackEngine_nativeSetDefaultStreamValues(
 }
 
 JNIEXPORT void JNICALL
-Java_com_example_papersynth_PlaybackEngine_nativeSetAlphaArray(
+Java_com_example_papersynth_PlaybackEngine_nativeSetPixelsArray(
         JNIEnv *env,
         jobject type,
         jlong engineHandle,
-        jintArray jAlphaArray,
+        jintArray jPixelsArray,
         jint jWidth,
         jint jHeight) {
 
-    std::vector<int> alphaArray = convertJavaIntArrayToVector(env, jAlphaArray);
+    std::vector<int> pixelsArray = convertJavaIntArrayToVector(env, jPixelsArray);
 
     auto *engine = reinterpret_cast<PaperSynthEngine*>(engineHandle);
     if (engine) {
-        engine->setAudioSourceAlphaArray(alphaArray, jWidth, jHeight);
+        engine->setAudioSourcePixelsArray(pixelsArray, jWidth, jHeight);
     } else {
         LOGE("Engine handle is invalid, call createEngine() to create a new one");
     }

@@ -64,7 +64,7 @@ public:
     double getCurrentOutputLatencyMillis();
     bool isLatencyDetectionSupported() const;
 
-    void setAudioSourceAlphaArray(std::vector<int> alphaArray, int width, int height);
+    void setAudioSourcePixelsArray(std::vector<int> pixelsArray, int width, int height);
 
 private:
     oboe::Result reopenStream();

@@ -1,6 +1,5 @@
 package com.example.papersynth.fragments
 
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
 import com.example.papersynth.PlaybackEngine
 import com.example.papersynth.R
@@ -69,10 +67,10 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
             R.id.btn_play_wave -> {
                 this.isOn = !this.isOn
                 if (this.isOn) {
-                    val alphaArray = canvasView.getAlphaArray()
-                    PlaybackEngine.setAlphaArray(alphaArray)
+                    val pixelsArray = canvasView.getPixelsArray()
+                    PlaybackEngine.setPixelsArray(pixelsArray)
                     waveButton?.let {
-                        it.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.elementD, null))
+                        it.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.orangeD, null))
                         it.text = "STOP"
                     }
                     clearButton?.let {
@@ -81,7 +79,7 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
                     }
                 } else {
                     waveButton?.let {
-                        it.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.elementD, null))
+                        it.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.tealD, null))
                         it.text = "PLAY"
                     }
                     clearButton?.let {

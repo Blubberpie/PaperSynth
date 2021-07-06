@@ -42,11 +42,11 @@ void PaperSynthSoundGenerator::renderAudio(float *audioData, int32_t numFrames) 
     bool shouldSweep = timeSinceLastSweep.count() >= sweepDelay_;
 
     if (waveIsOn_ && shouldSweep) {
-        processAlphaArray();
-        curSweepPosition_ = (curSweepPosition_ == alphaArrayWidth_ - 1) ? 0 : curSweepPosition_ + 1;
+        processPixelsArray();
+        curSweepPosition_ = (curSweepPosition_ == pixelsArrayWidth_ - 1) ? 0 : curSweepPosition_ + 1;
         lastSweepTime_ = curTime;
     } else if (!waveIsOn_) {
-        processAlphaArray(true);
+        processPixelsArray(true);
     }
 
     outputStage_->renderAudio(audioData, numFrames);
@@ -57,10 +57,10 @@ void PaperSynthSoundGenerator::tap(bool isOn) {
     if (!isOn) curSweepPosition_ = 0;
 }
 
-void PaperSynthSoundGenerator::processAlphaArray(bool disableAll) {
-    for (int row = 0; row < alphaArrayHeight_; ++row) {
-        int pos = row * alphaArrayWidth_ + curSweepPosition_;
-        if (alphaArray_[pos] > 0) {
+void PaperSynthSoundGenerator::processPixelsArray(bool disableAll) {
+    for (int row = 0; row < pixelsArrayHeight_; ++row) {
+        int pos = row * pixelsArrayWidth_ + curSweepPosition_;
+        if (((pixelsArray_[pos] >> 24u) & 0xff) > 0) {
             oscillators_[row]->setWaveOn(waveIsOn_ && !disableAll);
         } else {
             oscillators_[row]->setWaveOn(false);

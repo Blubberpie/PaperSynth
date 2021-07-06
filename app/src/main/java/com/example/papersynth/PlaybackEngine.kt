@@ -3,7 +3,7 @@ package com.example.papersynth
 import android.content.Context
 import android.media.AudioManager
 import android.os.Build
-import com.example.papersynth.dataclasses.AlphaArray
+import com.example.papersynth.dataclasses.PixelsArray
 import com.example.papersynth.dataclasses.FourierSeries
 import org.jetbrains.kotlinx.multik.ndarray.operations.toList
 
@@ -61,12 +61,12 @@ object PlaybackEngine {
         if (mEngineHandle != 0L) nativeSetToneOn(mEngineHandle, isToneOn)
     }
 
-    fun setAlphaArray(alphaArray: AlphaArray) {
-        if (mEngineHandle != 0L) nativeSetAlphaArray(
+    fun setPixelsArray(pixelsArray: PixelsArray) {
+        if (mEngineHandle != 0L) nativeSetPixelsArray(
             mEngineHandle,
-            alphaArray.alphaArray,
-            alphaArray.width,
-            alphaArray.height
+            pixelsArray.pixelsArray,
+            pixelsArray.width,
+            pixelsArray.height
         )
     }
 
@@ -103,7 +103,7 @@ object PlaybackEngine {
     private external fun nativeSetChannelCount(mEngineHandle: Long, channelCount: Int)
     private external fun nativeSetBufferSizeInBursts(engineHandle: Long, bufferSizeInBursts: Int)
     private external fun nativeSetDefaultStreamValues(sampleRate: Int, framesPerBurst: Int)
-    private external fun nativeSetAlphaArray(engineHandle: Long, alphaArray: IntArray, width: Int, height: Int)
+    private external fun nativeSetPixelsArray(engineHandle: Long, pixelsArray: IntArray, width: Int, height: Int)
 
     private external fun nativeGetCurrentOutputLatencyMillis(engineHandle: Long): Double
     private external fun nativeIsLatencyDetectionSupported(engineHandle: Long): Boolean

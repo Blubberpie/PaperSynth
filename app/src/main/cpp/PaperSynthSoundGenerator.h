@@ -54,10 +54,10 @@ public:
 
     void renderAudio(float *audioData, int32_t numFrames) override;
 
-    void setAlphaArray(std::vector<int> alphaArray) { alphaArray_ = alphaArray; }
-    void setAlphaArrayDimensions(int width, int height) {
-        alphaArrayWidth_ = width;
-        alphaArrayHeight_ = height;
+    void setPixelsArray(std::vector<int> pixelsArray) { pixelsArray_ = pixelsArray; }
+    void setPixelsArrayDimensions(int width, int height) {
+        pixelsArrayWidth_ = width;
+        pixelsArrayHeight_ = height;
     }
     static Eigen::Array<float, 1, Eigen::Dynamic> calculateFourierWave(const FourierSeries& fourierSeries, int n);
 
@@ -69,9 +69,9 @@ private:
 
     int numOscs_ = 88;
 
-    std::vector<int> alphaArray_;
-    int alphaArrayWidth_ = 0;
-    int alphaArrayHeight_ = 0;
+    std::vector<int> pixelsArray_;
+    int pixelsArrayWidth_ = 0;
+    int pixelsArrayHeight_ = 0;
 
     high_resolution_clock::time_point lastSweepTime_;
     bool waveIsOn_ = false;
@@ -79,7 +79,7 @@ private:
     int sweepDelay_ = 30; // ms
     int curSweepPosition_ = 0;
 
-    void processAlphaArray(bool disableAll=false);
+    void processPixelsArray(bool disableAll=false);
     static Eigen::Array<float, 1, Eigen::Dynamic> calculateFrequency(int k, const Eigen::Array<float, 1, Eigen::Dynamic>& xs, float period);
 };
 
