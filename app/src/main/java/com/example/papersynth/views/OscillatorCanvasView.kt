@@ -181,10 +181,8 @@ class OscillatorCanvasView : View {
     }
 
     private fun initializeSineWave() {
-        for (w in waveList) {
-            for (i in 0 until NUM_SAMPLES) {
-                w[i] = calculateSineSample(i, b=HALF_WAVE_CYCLE)
-            }
+        for (i in 0 until NUM_SAMPLES) {
+            waveList[currentWave.ordinal][i] = calculateSineSample(i, b=HALF_WAVE_CYCLE)
         }
     }
 
