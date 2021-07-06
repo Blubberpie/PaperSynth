@@ -13,6 +13,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentActivity
 import com.example.papersynth.R
 import com.example.papersynth.dataclasses.FourierSeries
+import com.example.papersynth.dataclasses.TextToDraw
 import com.example.papersynth.utils.CurveFittingUtil
 import com.example.papersynth.utils.CurveFittingUtil.calculateSineSample
 import com.example.papersynth.utils.FileUtil
@@ -31,11 +32,15 @@ private const val GRID_STROKE_ACCENT_WIDTH = 3f
 
 class OscillatorCanvasView : View {
 
+    enum class WaveEnum {
+        WAVE_1, WAVE_2, WAVE_3, NUM_WAVES
+    }
+
     // Late init //
 
     private lateinit var mainCanvas: Canvas
     private lateinit var mainBitmap: Bitmap
-    private lateinit var sampleListFourier: FourierSeries
+    private lateinit var currentFourierSeries: FourierSeries
     private lateinit var calculatedFourierYs: NDArray<Float, D1>
 
     // Dot-related
@@ -87,7 +92,8 @@ class OscillatorCanvasView : View {
     private val gridLinesThick = Path()
     private val textsToDraw: ArrayList<TextToDraw> = ArrayList()
 
-    private var sampleList = FloatArray(NUM_SAMPLES)
+    private var waveList: ArrayList<FloatArray> = ArrayList(WaveEnum.NUM_WAVES.ordinal)
+    private var currentWave = WaveEnum.WAVE_1
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -98,13 +104,21 @@ class OscillatorCanvasView : View {
         super.onSizeChanged(width, height, oldWidth, oldHeight)
         if (::mainBitmap.isInitialized) mainBitmap.recycle()
 
+        for (i in 0 until WaveEnum.NUM_WAVES.ordinal) {
+            waveList.add(FloatArray(NUM_SAMPLES))
+        }
+
         try {
             val activity: FragmentActivity = context as FragmentActivity
-            val data: FloatArray? = FileUtil.readOscillatorFromFile(activity, "my_oscillators.json")
-            if (data == null) {
+            val oscs = FileUtil.readOscillatorFromFile(activity, "my_oscillators.json")
+            if (oscs == null) {
                 resetOscillator()
             } else {
-                sampleList = data
+                oscs.forEachIndexed { i, osc ->
+                    (osc.oscillator_data)?.let {
+                        waveList[i] = it
+                    }
+                }
             }
 
         } catch (e: FileNotFoundException) {
@@ -161,21 +175,23 @@ class OscillatorCanvasView : View {
     // CALCULATIONS //
 
     private fun handleFourierComputations() {
-        setFourierSeries(computeCurve())
+        setFourierSeries(computeCurve(currentWave))
         generateYs()
         generateFourierPath()
     }
 
     private fun initializeSineWave() {
-        for (i in 0 until NUM_SAMPLES) {
-            sampleList[i] = calculateSineSample(i, b=HALF_WAVE_CYCLE)
+        for (w in waveList) {
+            for (i in 0 until NUM_SAMPLES) {
+                w[i] = calculateSineSample(i, b=HALF_WAVE_CYCLE)
+            }
         }
     }
 
     private fun generateYs() {
-        calculatedFourierYs = CurveFittingUtil.initializeFourierYs(numStepsFourier, sampleListFourier.a0)
+        calculatedFourierYs = CurveFittingUtil.initializeFourierYs(numStepsFourier, currentFourierSeries.a0)
         calculatedFourierYs = CurveFittingUtil.calculateValuesByCoefficients(
-            sampleListFourier,
+            currentFourierSeries,
             arrXsFourier,
             calculatedFourierYs
         )
@@ -202,8 +218,8 @@ class OscillatorCanvasView : View {
         }
     }
 
-    private fun computeCurve(): FourierSeries {
-        return CurveFittingUtil.fit(sampleList, NUM_SAMPLES)
+    private fun computeCurve(wave: WaveEnum): FourierSeries {
+        return CurveFittingUtil.fit(waveList[wave.ordinal], NUM_SAMPLES)
     }
 
     // Drawing //
@@ -213,7 +229,7 @@ class OscillatorCanvasView : View {
     }
 
     private fun drawDotSamples(canvas: Canvas) {
-        sampleList.forEachIndexed { i, sample ->
+        waveList[currentWave.ordinal].forEachIndexed { i, sample ->
             val xPos = (i * dotSpreadAmount) + CANVAS_PADDING
             val yPos = (canvasHalfHeight * (1 - sample)) + CANVAS_PADDING
 
@@ -287,21 +303,27 @@ class OscillatorCanvasView : View {
         if (samplePos < 0) samplePos = 0
         else if (samplePos >= NUM_SAMPLES) samplePos = NUM_SAMPLES - 1
 
-        sampleList[samplePos] = sampleVal
+        waveList[currentWave.ordinal][samplePos] = sampleVal
     }
 
     private fun setFourierSeries(fourierSeries: FourierSeries) {
-        sampleListFourier = fourierSeries
+        currentFourierSeries = fourierSeries
     }
 
     //// Public ////
 
-    fun getOscillator(): FloatArray {
-        return sampleList
+    fun getWaves(): ArrayList<FloatArray> {
+        return waveList
     }
 
     fun resetOscillator() {
         initializeSineWave()
+        handleFourierComputations()
+        invalidate()
+    }
+
+    fun setCurrentWave(wave: WaveEnum) {
+        currentWave = wave
         handleFourierComputations()
         invalidate()
     }

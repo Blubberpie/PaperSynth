@@ -1,7 +1,6 @@
 package com.example.papersynth.utils
 
 import android.Manifest
-import android.R.attr.path
 import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -23,7 +22,7 @@ object FileUtil {
     fun writeOscillatorToFile(
         fragmentActivity: FragmentActivity,
         filename: String,
-        data: FloatArray
+        waves: ArrayList<FloatArray>
     ) {
         ActivityCompat.requestPermissions(fragmentActivity, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
 
@@ -36,7 +35,11 @@ object FileUtil {
         FileOutputStream(File(file, filename)).use { fos ->
             val writer = JsonWriter(OutputStreamWriter(fos, "UTF-8"))
             writer.setIndent("  ")
-            writeOscillatorObject(writer, data)
+            writer.beginArray()
+            waves.forEachIndexed {i, wave ->
+                writeOscillatorObject(writer, wave, i)
+            }
+            writer.endArray()
             writer.close()
         }
     }
@@ -45,11 +48,11 @@ object FileUtil {
     fun readOscillatorFromFile(
         activity: Activity,
         filename: String
-    ) : FloatArray? {
+    ) : ArrayList<Oscillator>? {
 
         ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
 
-        var floatArr: FloatArray?
+        var oscs: ArrayList<Oscillator>?
         val dir = File(activity.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "PaperSynth")
 
         if (!dir.exists()) {
@@ -70,11 +73,11 @@ object FileUtil {
                     }
                     reader.endArray()
 
-                    floatArr = oscillators[0].oscillator_data
+                    oscs = oscillators as ArrayList
                 }
             }
         }
-        return floatArr
+        return oscs
     }
 
     fun writeCanvasToFile(
@@ -121,11 +124,9 @@ object FileUtil {
     /// PRIVATE ///
 
     @Throws(IOException::class)
-    private fun writeOscillatorObject(writer: JsonWriter, data: FloatArray) {
-        writer.beginArray()
-
+    private fun writeOscillatorObject(writer: JsonWriter, data: FloatArray, i: Int) {
         writer.beginObject()
-        writer.name("name").value("oscillator_1")
+        writer.name("name").value("wave_$i")
         writer.name("oscillator_data")
         writer.beginArray()
         for (x in data) {
@@ -133,8 +134,6 @@ object FileUtil {
         }
         writer.endArray()
         writer.endObject()
-
-        writer.endArray()
     }
 
     @Throws(IOException::class)

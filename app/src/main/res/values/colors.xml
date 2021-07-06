@@ -16,11 +16,11 @@
     <color name="textL">#EBEBF0</color>
     <color name="brushL">#F2F2F5</color>
 
-    <color name="redD">#FF3B3B</color>
+    <color name="redD">#C2185B</color>
     <color name="orangeD">#FDAC42</color>
     <color name="yellowD">#FFCC00</color>
-    <color name="greenD">#06C270</color>
+    <color name="greenD">#61C688</color>
     <color name="tealD">#00CFDE</color>
-    <color name="blueD">#3568D4</color>
-    <color name="purpleD">#6600CC</color>
+    <color name="blueD">#266BAF</color>
+    <color name="purpleD">#9D27B0</color>
 </resources>

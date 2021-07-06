@@ -70,7 +70,7 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
                     val pixelsArray = canvasView.getPixelsArray()
                     PlaybackEngine.setPixelsArray(pixelsArray)
                     waveButton?.let {
-                        it.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.orangeD, null))
+                        it.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.redD, null))
                         it.text = "STOP"
                     }
                     clearButton?.let {
@@ -79,7 +79,7 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
                     }
                 } else {
                     waveButton?.let {
-                        it.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.tealD, null))
+                        it.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.greenD, null))
                         it.text = "PLAY"
                     }
                     clearButton?.let {

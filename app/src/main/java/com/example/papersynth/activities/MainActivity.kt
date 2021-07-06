@@ -115,15 +115,17 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun applyWave() {
         // TODO: save coefficients in json
-        val oscData: FloatArray? = FileUtil.readOscillatorFromFile(this as Activity, "my_oscillators.json")
-        if (oscData == null) {
+        val oscs = FileUtil.readOscillatorFromFile(this as Activity, "my_oscillators.json")
+        if (oscs == null) {
             val oscDataNew = FloatArray(NUM_SAMPLES)
             for (i in 0 until NUM_SAMPLES) {
                 oscDataNew[i] = CurveFittingUtil.calculateSineSample(i, b = HALF_WAVE_CYCLE)
             }
             fourierSeries = CurveFittingUtil.fit(oscDataNew, NUM_SAMPLES)
         } else {
-            fourierSeries = CurveFittingUtil.fit(oscData, NUM_SAMPLES)
+            oscs[0].oscillator_data?.let {
+                fourierSeries = CurveFittingUtil.fit(it, NUM_SAMPLES)
+            }
         }
     }
 

@@ -25,10 +25,7 @@ class OscillatorCanvasFragment : Fragment(R.layout.fragment_oscillator_canvas), 
         val view = inflater.inflate(R.layout.fragment_oscillator_canvas, container, false)
         oscillatorCanvasView = view.findViewById(R.id.oscillator_canvas_view)
 
-        val saveOscButton = activity?.findViewById<Button>(R.id.btn_save_oscillator)
-        saveOscButton?.setOnClickListener(this)
-        val testFitButton = activity?.findViewById<Button>(R.id.btn_reset_oscillator)
-        testFitButton?.setOnClickListener(this)
+        initializeButtons()
 
         return view
     }
@@ -37,10 +34,10 @@ class OscillatorCanvasFragment : Fragment(R.layout.fragment_oscillator_canvas), 
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.btn_save_oscillator -> {
-                val oscArr = oscillatorCanvasView.getOscillator()
+                val waves = oscillatorCanvasView.getWaves()
                 activity?.let { fragmentActivity ->
                     try {
-                        writeOscillatorToFile(fragmentActivity, "my_oscillators.json", oscArr)
+                        writeOscillatorToFile(fragmentActivity, "my_oscillators.json", waves)
                     } catch (e: IOException) {
                         Log.e("Error", "Error occurred while trying to save oscillator as JSON file!")
                     }
@@ -49,6 +46,28 @@ class OscillatorCanvasFragment : Fragment(R.layout.fragment_oscillator_canvas), 
             R.id.btn_reset_oscillator -> {
                 oscillatorCanvasView.resetOscillator()
             }
+            R.id.btn_wave_1 -> {
+                oscillatorCanvasView.setCurrentWave(OscillatorCanvasView.WaveEnum.WAVE_1)
+            }
+            R.id.btn_wave_2 -> {
+                oscillatorCanvasView.setCurrentWave(OscillatorCanvasView.WaveEnum.WAVE_2)
+            }
+            R.id.btn_wave_3 -> {
+                oscillatorCanvasView.setCurrentWave(OscillatorCanvasView.WaveEnum.WAVE_3)
+            }
         }
+    }
+
+    private fun initializeButtons() {
+        val saveOscButton = activity?.findViewById<Button>(R.id.btn_save_oscillator)
+        saveOscButton?.setOnClickListener(this)
+        val testFitButton = activity?.findViewById<Button>(R.id.btn_reset_oscillator)
+        testFitButton?.setOnClickListener(this)
+        val wave1Button = activity?.findViewById<Button>(R.id.btn_wave_1)
+        wave1Button?.setOnClickListener(this)
+        val wave2Button = activity?.findViewById<Button>(R.id.btn_wave_2)
+        wave2Button?.setOnClickListener(this)
+        val wave3Button = activity?.findViewById<Button>(R.id.btn_wave_3)
+        wave3Button?.setOnClickListener(this)
     }
 }
