@@ -43,7 +43,7 @@ public:
     PaperSynthSoundGenerator(
             int32_t sampleRate,
             int32_t channelCount,
-            const FourierSeries& fourierSeries);
+            const std::vector<FourierSeries>& fourierSeries);
     ~PaperSynthSoundGenerator() = default;
 
     PaperSynthSoundGenerator(PaperSynthSoundGenerator&& other) = default;
@@ -72,6 +72,7 @@ private:
     std::vector<int> pixelsArray_;
     int pixelsArrayWidth_ = 0;
     int pixelsArrayHeight_ = 0;
+    std::vector<Eigen::Array<float, 1, Eigen::Dynamic>> fourierWaves_;
 
     high_resolution_clock::time_point lastSweepTime_;
     bool waveIsOn_ = false;

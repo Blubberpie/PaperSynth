@@ -22,7 +22,7 @@ constexpr int32_t BUFFER_SIZE_AUTOMATIC = 0;
 
 class PaperSynthEngine : public IRestartable {
 public:
-    PaperSynthEngine(FourierSeries fourierSeries);
+    PaperSynthEngine(std::vector<FourierSeries> fourierSeries);
     virtual  ~PaperSynthEngine() = default;
 
     void tap(bool isDown);
@@ -70,7 +70,7 @@ private:
     oboe::Result reopenStream();
     oboe::Result openPlaybackStream();
 
-    FourierSeries fourierSeries_;
+    std::vector<FourierSeries> fourierSeries_;
     std::shared_ptr<oboe::AudioStream> stream_;
     std::unique_ptr<PaperSynthLatencyTuningCallback> latencyCallback_;
     std::unique_ptr<DefaultErrorCallback> errorCallback_;

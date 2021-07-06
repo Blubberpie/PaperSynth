@@ -126,7 +126,7 @@ object FileUtil {
     @Throws(IOException::class)
     private fun writeOscillatorObject(writer: JsonWriter, data: FloatArray, i: Int) {
         writer.beginObject()
-        writer.name("name").value("wave_$i")
+        writer.name("name").value("wave_${i + 1}")
         writer.name("oscillator_data")
         writer.beginArray()
         for (x in data) {

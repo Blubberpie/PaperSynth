@@ -41,19 +41,35 @@ JNIEXPORT jlong JNICALL
 Java_com_example_papersynth_PlaybackEngine_nativeCreateEngine(
         JNIEnv *env,
         jobject thiz,
-        jfloatArray jCoefficientsA,
-        jfloatArray jCoefficientsB,
-        jint jNumTerms,
-        jfloat jA0
+        jfloatArray jCoefficientsA1,
+        jfloatArray jCoefficientsB1,
+        jint jNumTerms1,
+        jfloat jA01,
+        jfloatArray jCoefficientsA2,
+        jfloatArray jCoefficientsB2,
+        jint jNumTerms2,
+        jfloat jA02,
+        jfloatArray jCoefficientsA3,
+        jfloatArray jCoefficientsB3,
+        jint jNumTerms3,
+        jfloat jA03
 ) {
 
-    std::vector<float> coefficientsA = convertJavaFloatArrayToVector(env, jCoefficientsA);
-    std::vector<float> coefficientsB = convertJavaFloatArrayToVector(env, jCoefficientsB);
+    std::vector<float> coefficientsA1 = convertJavaFloatArrayToVector(env, jCoefficientsA1);
+    std::vector<float> coefficientsB1 = convertJavaFloatArrayToVector(env, jCoefficientsB1);
+    std::vector<float> coefficientsA2 = convertJavaFloatArrayToVector(env, jCoefficientsA2);
+    std::vector<float> coefficientsB2 = convertJavaFloatArrayToVector(env, jCoefficientsB2);
+    std::vector<float> coefficientsA3 = convertJavaFloatArrayToVector(env, jCoefficientsA3);
+    std::vector<float> coefficientsB3 = convertJavaFloatArrayToVector(env, jCoefficientsB3);
+
+    std::vector<FourierSeries> series;
+
+    series.emplace_back(FourierSeries(coefficientsA1, coefficientsB1, jNumTerms1, jA01));
+    series.emplace_back(FourierSeries(coefficientsA2, coefficientsB2, jNumTerms2, jA02));
+    series.emplace_back(FourierSeries(coefficientsA3, coefficientsB3, jNumTerms3, jA03));
 
     // We use std::nothrow so `new` returns a nullptr if the engine creation fails
-    auto *engine = new(std::nothrow) PaperSynthEngine(
-            FourierSeries(coefficientsA, coefficientsB, jNumTerms, jA0)
-            );
+    auto *engine = new(std::nothrow) PaperSynthEngine(series);
     if (engine == nullptr) {
         LOGE("Could not instantiate PaperSynthEngine");
         return 0;

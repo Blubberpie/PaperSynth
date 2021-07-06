@@ -10,10 +10,11 @@
 #include "PaperSynthEngine.h"
 #include "PaperSynthOscillator.h"
 
-PaperSynthEngine::PaperSynthEngine(FourierSeries fourierSeries)
-        : fourierSeries_(std::move(fourierSeries))
-        , latencyCallback_(std::make_unique<PaperSynthLatencyTuningCallback>())
+PaperSynthEngine::PaperSynthEngine(std::vector<FourierSeries> fourierSeries)
+        : latencyCallback_(std::make_unique<PaperSynthLatencyTuningCallback>())
         , errorCallback_(std::make_unique<DefaultErrorCallback>(*this)){
+
+        fourierSeries_ = std::move(fourierSeries);
 }
 
 void PaperSynthEngine::tap(bool isDown) {

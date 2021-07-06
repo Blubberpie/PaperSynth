@@ -9,14 +9,23 @@ import org.jetbrains.kotlinx.multik.ndarray.operations.toList
 
 object PlaybackEngine {
     private var mEngineHandle: Long = 0
-    fun create(context: Context, fourierSeries: FourierSeries): Boolean {
+    fun create(context: Context, fourierSeries: ArrayList<FourierSeries>): Boolean {
         if (mEngineHandle == 0L) {
             setDefaultStreamValues(context)
+            // TODO: Pressed for time. VERY BAD CODE LOL
             mEngineHandle = nativeCreateEngine(
-                fourierSeries.coefficientsA.toList().toFloatArray(),
-                fourierSeries.coefficientsB.toList().toFloatArray(),
-                fourierSeries.numTerms,
-                fourierSeries.a0
+                fourierSeries[0].coefficientsA.toList().toFloatArray(),
+                fourierSeries[0].coefficientsB.toList().toFloatArray(),
+                fourierSeries[0].numTerms,
+                fourierSeries[0].a0,
+                fourierSeries[1].coefficientsA.toList().toFloatArray(),
+                fourierSeries[1].coefficientsB.toList().toFloatArray(),
+                fourierSeries[1].numTerms,
+                fourierSeries[1].a0,
+                fourierSeries[2].coefficientsA.toList().toFloatArray(),
+                fourierSeries[2].coefficientsB.toList().toFloatArray(),
+                fourierSeries[2].numTerms,
+                fourierSeries[2].a0
             )
         }
         return mEngineHandle != 0L
@@ -92,7 +101,20 @@ object PlaybackEngine {
         get() = mEngineHandle != 0L && nativeIsLatencyDetectionSupported(mEngineHandle)
 
     // Native methods
-    private external fun nativeCreateEngine(coefficientsA: FloatArray, coefficientsB: FloatArray, numTerms: Int, a0: Float): Long
+    private external fun nativeCreateEngine(
+        coefficientsA1: FloatArray,
+        coefficientsB1: FloatArray,
+        numTerms1: Int,
+        a01: Float,
+        coefficientsA2: FloatArray,
+        coefficientsB2: FloatArray,
+        numTerms2: Int,
+        a02: Float,
+        coefficientsA3: FloatArray,
+        coefficientsB3: FloatArray,
+        numTerms3: Int,
+        a03: Float,
+    ): Long
     private external fun nativeStartEngine(engineHandle: Long): Int
     private external fun nativeStopEngine(engineHandle: Long): Int
     private external fun nativeDeleteEngine(engineHandle: Long)

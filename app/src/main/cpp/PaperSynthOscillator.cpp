@@ -6,8 +6,8 @@
 
 #include <utility>
 
-PaperSynthOscillator::PaperSynthOscillator(Eigen::Array<float, 1, Eigen::Dynamic> fourierWave) {
-    setFourierWave(std::move(fourierWave));
+PaperSynthOscillator::PaperSynthOscillator(std::vector<Eigen::Array<float, 1, Eigen::Dynamic>> *fourierWaves) {
+    setFourierWaves(fourierWaves);
 }
 
 void PaperSynthOscillator::renderAudio(float *audioData, int32_t numFrames) {
@@ -17,7 +17,7 @@ void PaperSynthOscillator::renderAudio(float *audioData, int32_t numFrames) {
             int pos = static_cast<int>(round(1024 * (phase_ / TWO_PI)));
             if (pos < 0) pos = 0;
             else if (pos >= 1024) pos = 1023;
-            audioData[i] = fourierWave_(pos) * amplitude_;
+            audioData[i] = fourierWaves_->at(0)(pos) * amplitude_;
 
             phase_ += phaseIncrement_;
             if (phase_ > TWO_PI) phase_ -= TWO_PI;
@@ -41,8 +41,8 @@ void PaperSynthOscillator::setFrequency(double frequency) {
     updatePhaseIncrement();
 }
 
-void PaperSynthOscillator::setFourierWave(Eigen::Array<float, 1, Eigen::Dynamic> fourierWave) {
-    fourierWave_ = std::move(fourierWave);
+void PaperSynthOscillator::setFourierWaves(std::vector<Eigen::Array<float, 1, Eigen::Dynamic>> *fourierWaves) {
+    fourierWaves_ = fourierWaves;
 }
 
 /// PRIVATE ///

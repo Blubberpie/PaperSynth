@@ -7,17 +7,19 @@
 PaperSynthSoundGenerator::PaperSynthSoundGenerator(
         int32_t sampleRate,
         int32_t channelCount,
-        const FourierSeries& fourierSeries
+        const std::vector<FourierSeries>& fourierSeries
 )
         : TappableAudioSource(sampleRate, channelCount) {
 
 //    lastPitchChangeTime_ = high_resolution_clock::now();
     float amplitude = 1.0f / (float)numOscs_; // TODO: make dynamic
 
-    Eigen::Array<float, 1, Eigen::Dynamic> fourierWave = calculateFourierWave(fourierSeries, 1024);
+    for (const FourierSeries& fs : fourierSeries) {
+        fourierWaves_.push_back(calculateFourierWave(fs, 1024));
+    }
 
     for (int i = 0; i < numOscs_; ++i) {
-        auto osc = new PaperSynthOscillator(fourierWave); // TODO: handle delete?? somehow?
+        auto osc = new PaperSynthOscillator(&fourierWaves_); // TODO: handle delete?? somehow?
         osc->setSampleRate(SAMPLE_RATE_DEFAULT);
         osc->setFrequency(curFrequency); // TODO: handle this
         osc->setAmplitude(amplitude);
@@ -60,7 +62,11 @@ void PaperSynthSoundGenerator::tap(bool isOn) {
 void PaperSynthSoundGenerator::processPixelsArray(bool disableAll) {
     for (int row = 0; row < pixelsArrayHeight_; ++row) {
         int pos = row * pixelsArrayWidth_ + curSweepPosition_;
-        if (((pixelsArray_[pos] >> 24u) & 0xff) > 0) {
+        // A = (color >> 24) & 0xff
+        // R = (color >> 16) & 0xff
+        // G = (color >>  8) & 0xff
+        // B = (color      ) & 0xff
+        if (((pixelsArray_[pos] >> 24) & 0xff) > 0) {
             oscillators_[row]->setWaveOn(waveIsOn_ && !disableAll);
         } else {
             oscillators_[row]->setWaveOn(false);

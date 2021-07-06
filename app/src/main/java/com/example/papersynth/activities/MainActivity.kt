@@ -27,7 +27,7 @@ private const val HALF_WAVE_CYCLE = NUM_SAMPLES / (2 * PI.toFloat())
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
-    private lateinit var fourierSeries: FourierSeries
+    private var fourierSeries: ArrayList<FourierSeries> = ArrayList()
 
     @Override
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -121,10 +121,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             for (i in 0 until NUM_SAMPLES) {
                 oscDataNew[i] = CurveFittingUtil.calculateSineSample(i, b = HALF_WAVE_CYCLE)
             }
-            fourierSeries = CurveFittingUtil.fit(oscDataNew, NUM_SAMPLES)
+            val series = CurveFittingUtil.fit(oscDataNew, NUM_SAMPLES)
+            for (i in 0 until 3) {
+                fourierSeries.add(series)
+            }
         } else {
-            oscs[0].oscillator_data?.let {
-                fourierSeries = CurveFittingUtil.fit(it, NUM_SAMPLES)
+            for (osc in oscs) {
+                osc.oscillator_data?.let {
+                    fourierSeries.add(CurveFittingUtil.fit(it, NUM_SAMPLES))
+                }
             }
         }
     }
