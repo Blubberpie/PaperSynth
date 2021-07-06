@@ -1,8 +1,6 @@
 package com.example.papersynth.fragments
 
-import android.content.Intent
-import android.content.res.Resources
-import android.graphics.Bitmap
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,23 +8,28 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.net.toFile
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
 import com.example.papersynth.PlaybackEngine
 import com.example.papersynth.R
 import com.example.papersynth.utils.FileUtil.readCanvasFromPath
 import com.example.papersynth.utils.FileUtil.writeCanvasToFile
 import com.example.papersynth.views.CanvasView
+import com.thebluealliance.spectrum.SpectrumDialog
 import java.text.DateFormat
-import java.time.format.DateTimeFormatter
 import java.util.*
+
 
 class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener {
 
     private lateinit var canvasView: CanvasView
+    private lateinit var colors: IntArray
 
     private var waveButton: Button? = null
     private var clearButton: Button? = null
+    private var colorPickerButton: Button? = null
+
     private var isOn: Boolean = false
 
     val loadCanvas = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -41,6 +44,16 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
 
         val view = inflater.inflate(R.layout.fragment_canvas, container, false)
         canvasView = view.findViewById(R.id.canvas_view)
+        colors = intArrayOf(
+            ResourcesCompat.getColor(resources, R.color.brushL, null),
+            ResourcesCompat.getColor(resources, R.color.redD, null),
+            ResourcesCompat.getColor(resources, R.color.orangeD, null),
+            ResourcesCompat.getColor(resources, R.color.yellowD, null),
+            ResourcesCompat.getColor(resources, R.color.greenD, null),
+            ResourcesCompat.getColor(resources, R.color.tealD, null),
+            ResourcesCompat.getColor(resources, R.color.blueD, null),
+            ResourcesCompat.getColor(resources, R.color.purple_200, null)
+        )
 
         initializeButtons()
 
@@ -59,7 +72,7 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
                     val alphaArray = canvasView.getAlphaArray()
                     PlaybackEngine.setAlphaArray(alphaArray)
                     waveButton?.let {
-                        it.setBackgroundColor(resources.getColor(R.color.orangeD))
+                        it.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.elementD, null))
                         it.text = "STOP"
                     }
                     clearButton?.let {
@@ -68,7 +81,7 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
                     }
                 } else {
                     waveButton?.let {
-                        it.setBackgroundColor(resources.getColor(R.color.tealD))
+                        it.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.elementD, null))
                         it.text = "PLAY"
                     }
                     clearButton?.let {
@@ -94,6 +107,14 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
             R.id.btn_toggle_grid -> {
                 canvasView.toggleGrid()
             }
+            R.id.btn_color_picker -> {
+                SpectrumDialog.Builder(context)
+                    .setColors(colors)
+                    .setDismissOnColorSelected(true)
+                    .setOutlineWidth(2)
+                    .setOnColorSelectedListener { positiveResult, color -> handleColorPicked(positiveResult, color) }
+                    .build().show(parentFragmentManager, "dialog_demo_1")
+            }
         }
     }
 
@@ -108,12 +129,20 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
         loadButton?.setOnClickListener(this)
         val toggleGridButton = activity?.findViewById<Button>(R.id.btn_toggle_grid)
         toggleGridButton?.setOnClickListener(this)
+        colorPickerButton = activity?.findViewById(R.id.btn_color_picker)
+        colorPickerButton?.setOnClickListener(this)
     }
 
     private fun handleReadCanvas(uri: Uri?) {
         activity?.let { fragmentActivity ->
             val loadedBitmap = readCanvasFromPath(fragmentActivity, uri?.path)
             canvasView.applyLoadedBitmap(loadedBitmap)
+        }
+    }
+
+    private fun handleColorPicked(positiveResult: Boolean, color: Int) {
+        if (positiveResult) {
+            canvasView.setCurrentColor(color)
         }
     }
 }

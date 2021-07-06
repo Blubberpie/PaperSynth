@@ -6,7 +6,6 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import android.view.animation.PathInterpolator
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.alpha
 import com.example.papersynth.R
@@ -37,7 +36,7 @@ class CanvasView : View {
 //    private val touchTolerance = ViewConfiguration.get(context).scaledTouchSlop
     private val touchTolerance = 8f // make it smoother
 
-    private val brushColor = ResourcesCompat.getColor(resources, R.color.brushL, null)
+    private var brushColor = ResourcesCompat.getColor(resources, R.color.brushL, null)
     private val brush = Paint().apply {
         color = brushColor
         isAntiAlias = true
@@ -57,9 +56,14 @@ class CanvasView : View {
         strokeWidth = 2f
     }
 
-    private val drawing = Path() // the drawing so far
-    private val curPath = Path() // current drawing
+    private val drawing: ArrayList<Stroke> = ArrayList() // the drawing so far
+    private val curPath = Stroke(Path(), brush) // current drawing
     private val gridLines = Path()
+
+    private data class Stroke(
+        var path: Path,
+        var paint: Paint
+    )
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -81,8 +85,10 @@ class CanvasView : View {
             canvas.drawPath(gridLines, gridBrush)
         }
         canvas.drawBitmap(mainBitmap, 0f, 0f, null)
-        canvas.drawPath(drawing, brush)
-        canvas.drawPath(curPath, brush)
+        for (stroke in drawing) {
+            canvas.drawPath(stroke.path, stroke.paint)
+        }
+        canvas.drawPath(curPath.path, curPath.paint)
         drawSweeper(canvas)
     }
 
@@ -102,8 +108,9 @@ class CanvasView : View {
     // PRIVATE
 
     private fun touchStart() {
-        curPath.reset()
-        curPath.moveTo(motionTouchEventX, motionTouchEventY)
+        curPath.path.reset()
+        curPath.paint = brush
+        curPath.path.moveTo(motionTouchEventX, motionTouchEventY)
         currentX = motionTouchEventX
         currentY = motionTouchEventY
     }
@@ -112,7 +119,7 @@ class CanvasView : View {
         val dx = abs(motionTouchEventX - currentX)
         val dy = abs(motionTouchEventY - currentY)
         if (dx >= touchTolerance || dy >= touchTolerance) {
-            curPath.quadTo( // quadratic bezier from pt1 to pt2
+            curPath.path.quadTo( // quadratic bezier from pt1 to pt2
                 currentX,
                 currentY,
                 (motionTouchEventX + currentX) / 2,
@@ -120,14 +127,14 @@ class CanvasView : View {
             )
             currentX = motionTouchEventX
             currentY = motionTouchEventY
-            mainCanvas.drawPath(curPath, brush) // cache it
+            mainCanvas.drawPath(curPath.path, curPath.paint) // cache it
         }
         invalidate() // force redraw screen with updated path
     }
 
     private fun touchUp() {
-        drawing.addPath(curPath)
-        curPath.reset()
+        drawing.add(curPath)
+        curPath.path.reset()
     }
 
     private fun drawSweeper(canvas: Canvas) {
@@ -228,8 +235,8 @@ class CanvasView : View {
     }
 
     fun clearCanvas() {
-        drawing.reset()
-        curPath.reset()
+        drawing.clear()
+        curPath.path.reset()
         mainCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
         invalidate()
     }
@@ -253,5 +260,10 @@ class CanvasView : View {
                 invalidate()
             }
         }
+    }
+
+    fun setCurrentColor(color: Int) {
+        brushColor = color
+        brush.color = brushColor
     }
 }

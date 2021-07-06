@@ -28,6 +28,28 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
+        android:id="@+id/btn_color_picker"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:text="COLOR"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@color/brushL"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:backgroundTint="@color/elementD"
+        app:iconTint="@color/brushL"
+        app:layout_constraintBottom_toTopOf="@+id/btn_oscillator_activity"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_weight="0.5"
+        app:layout_constraintStart_toEndOf="@+id/fragment_container_view"
+        app:layout_constraintTop_toBottomOf="@+id/btn_toggle_grid" />
+
+    <Button
         android:id="@+id/btn_toggle_grid"
         android:layout_width="0dp"
         android:layout_height="40dp"
