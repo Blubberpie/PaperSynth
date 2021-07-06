@@ -110,6 +110,7 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
             R.id.btn_color_picker -> {
                 SpectrumDialog.Builder(context)
                     .setColors(colors)
+                    .setSelectedColor(canvasView.getCurrentColor())
                     .setDismissOnColorSelected(true)
                     .setOutlineWidth(2)
                     .setOnColorSelectedListener { positiveResult, color -> handleColorPicked(positiveResult, color) }

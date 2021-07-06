@@ -266,4 +266,7 @@ class CanvasView : View {
         brushColor = color
         brush.color = brushColor
     }
+    fun getCurrentColor(): Int {
+        return brushColor
+    }
 }
