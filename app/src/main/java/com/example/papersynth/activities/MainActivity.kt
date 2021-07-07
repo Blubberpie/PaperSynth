@@ -115,6 +115,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun applyWave() {
         // TODO: save coefficients in json
+        fourierSeries = ArrayList()
         val oscs = FileUtil.readOscillatorFromFile(this as Activity, "my_oscillators.json")
         if (oscs == null) {
             val oscDataNew = FloatArray(NUM_SAMPLES)
