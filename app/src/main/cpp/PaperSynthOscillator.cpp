@@ -17,7 +17,10 @@ void PaperSynthOscillator::renderAudio(float *audioData, int32_t numFrames) {
             int pos = static_cast<int>(round(1024 * (phase_ / TWO_PI)));
             if (pos < 0) pos = 0;
             else if (pos >= 1024) pos = 1023;
-            audioData[i] = fourierWaves_->at(0)(pos) * amplitude_;
+            audioData[i] =
+                    (fourierWaves_->at(0)(pos) * amplitude1_)
+                    + (fourierWaves_->at(1)(pos) * amplitude2_)
+                    + (fourierWaves_->at(2)(pos) * amplitude3_);
 
             phase_ += phaseIncrement_;
             if (phase_ > TWO_PI) phase_ -= TWO_PI;

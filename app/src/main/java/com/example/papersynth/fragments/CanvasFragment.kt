@@ -1,5 +1,6 @@
 package com.example.papersynth.fragments
 
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -50,7 +51,13 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
             ResourcesCompat.getColor(resources, R.color.greenD, null),
             ResourcesCompat.getColor(resources, R.color.tealD, null),
             ResourcesCompat.getColor(resources, R.color.blueD, null),
-            ResourcesCompat.getColor(resources, R.color.purple_200, null)
+            ResourcesCompat.getColor(resources, R.color.purple_200, null),
+            Color.RED,
+            Color.GREEN,
+            Color.BLUE,
+            Color.CYAN,
+            Color.MAGENTA,
+            Color.YELLOW
         )
 
         initializeButtons()

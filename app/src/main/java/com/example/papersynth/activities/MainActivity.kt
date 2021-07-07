@@ -27,7 +27,7 @@ private const val HALF_WAVE_CYCLE = NUM_SAMPLES / (2 * PI.toFloat())
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
-    private var fourierSeries: ArrayList<FourierSeries> = ArrayList()
+    private lateinit var fourierSeries: ArrayList<FourierSeries>
 
     @Override
     override fun onCreate(savedInstanceState: Bundle?) {
