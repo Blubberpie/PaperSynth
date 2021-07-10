@@ -10,13 +10,13 @@
 #include "PaperSynthEngine.h"
 #include "PaperSynthOscillator.h"
 
-PaperSynthEngine::PaperSynthEngine(std::vector<FourierSeries> fourierSeries, int scaleOrdinal)
+PaperSynthEngine::PaperSynthEngine(std::vector<FourierSeries> fourierSeries, int scaleOrdinal, int canvasHeight)
         : latencyCallback_(std::make_unique<PaperSynthLatencyTuningCallback>())
         , errorCallback_(std::make_unique<DefaultErrorCallback>(*this)){
 
         fourierSeries_ = std::move(fourierSeries);
         scaleOrdinal_ = scaleOrdinal;
-
+        canvasHeight_ = canvasHeight;
 }
 
 void PaperSynthEngine::tap(bool isDown) {
@@ -34,7 +34,8 @@ oboe::Result PaperSynthEngine::start() {
                 stream_->getSampleRate(),
                 stream_->getChannelCount(),
                 fourierSeries_,
-                scaleOrdinal_);
+                scaleOrdinal_,
+                canvasHeight_);
         latencyCallback_->setSource(std::dynamic_pointer_cast<IRenderableAudio>(audioSource_));
 
         LOGD("Stream opened: AudioAPI = %d, channelCount = %d, deviceID = %d",

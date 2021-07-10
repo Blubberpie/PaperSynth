@@ -9,11 +9,16 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.res.ResourcesCompat
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
 import com.example.papersynth.PlaybackEngine
 import com.example.papersynth.R
+import com.example.papersynth.enums.MusicalScale
 import com.example.papersynth.utils.FileUtil.readCanvasFromPath
 import com.example.papersynth.utils.FileUtil.writeCanvasToFile
+import com.example.papersynth.viewmodels.ScaleViewModel
 import com.example.papersynth.views.CanvasView
 import com.thebluealliance.spectrum.SpectrumDialog
 import java.text.DateFormat
@@ -25,9 +30,11 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
     private lateinit var canvasView: CanvasView
     private lateinit var colors: IntArray
 
+    private val scaleViewModel: ScaleViewModel by activityViewModels()
     private var waveButton: Button? = null
     private var clearButton: Button? = null
     private var colorPickerButton: Button? = null
+    private var selectedScale = MusicalScale.CHROMATIC
 
     private var isOn: Boolean = false
 
@@ -40,6 +47,12 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
+        activity?.let {
+            scaleViewModel.selectedScale.observe(it) { scale ->
+                selectedScale = scale
+            }
+        }
 
         val view = inflater.inflate(R.layout.fragment_canvas, container, false)
         canvasView = view.findViewById(R.id.canvas_view)
@@ -74,7 +87,7 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
             R.id.btn_play_wave -> {
                 this.isOn = !this.isOn
                 if (this.isOn) {
-                    val pixelsArray = canvasView.getPixelsArray()
+                    val pixelsArray = canvasView.getPixelsArray(selectedScale)
                     PlaybackEngine.setPixelsArray(pixelsArray)
                     waveButton?.let {
                         it.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.redD, null))
@@ -123,6 +136,8 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
             }
         }
     }
+
+    /// FRAGMENT FUNCTIONS ///
 
     private fun initializeButtons() {
         clearButton = activity?.findViewById(R.id.btn_clear)

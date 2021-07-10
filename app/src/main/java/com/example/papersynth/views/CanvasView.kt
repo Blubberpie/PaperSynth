@@ -10,6 +10,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.alpha
 import com.example.papersynth.R
 import com.example.papersynth.dataclasses.PixelsArray
+import com.example.papersynth.enums.MusicalScale
 import kotlin.math.abs
 
 private const val STROKE_WIDTH = 16f
@@ -181,11 +182,11 @@ class CanvasView : View {
 //        }
     }
 
-    private fun getResizedBitmap(bm: Bitmap): Bitmap {
+    private fun getResizedBitmap(bm: Bitmap, newWidth: Int, newHeight: Int): Bitmap {
         val width = bm.width
         val height = bm.height
-        val scaleWidth = resizedWidth.toFloat() / width
-        val scaleHeight = resizedHeight.toFloat() / height
+        val scaleWidth = newWidth.toFloat() / width
+        val scaleHeight = newHeight.toFloat() / height
 
         val matrix = Matrix()
         matrix.postScale(scaleWidth, scaleHeight)
@@ -224,15 +225,38 @@ class CanvasView : View {
     }
 
     // TODO: some mechanism to detect if bitmap has changed so that PSE doesn't have to process again
-    fun getPixelsArray(): PixelsArray {
+    fun getPixelsArray(selectedScale: MusicalScale): PixelsArray {
         this.setBackgroundColor(Color.TRANSPARENT)
         draw(mainCanvas)
         val pixels = IntArray(resizedWidth * resizedHeight)
-        getResizedBitmap(mainBitmap).getPixels(pixels, 0, resizedWidth, 0, 0, resizedWidth, resizedHeight)
-        return PixelsArray(
-            pixels,
-            resizedWidth,
-            resizedHeight)
+        val resizedPixels = getResizedBitmap(mainBitmap, resizedWidth, resizedHeight)
+        resizedPixels.getPixels(pixels, 0, resizedWidth, 0, 0, resizedWidth, resizedHeight)
+        if (selectedScale.compareTo(MusicalScale.CHROMATIC) == 0) { // 12
+            return PixelsArray(
+                pixels,
+                resizedWidth,
+                resizedHeight)
+        } else {
+            var newNewHeight = 50 // 7
+            if (
+                selectedScale.compareTo(MusicalScale.WHOLE_TONE) == 0
+                || selectedScale.compareTo(MusicalScale.BLUES_HEXATONIC) == 0
+            ) {
+                newNewHeight = 42 // 6
+            } else if (
+                selectedScale.compareTo(MusicalScale.AKEBONO) == 0
+                || selectedScale.compareTo(MusicalScale.PENTATONIC) == 0
+            ) {
+               newNewHeight = 35 // 5
+            }
+            val newPixels = IntArray(resizedWidth * newNewHeight)
+            getResizedBitmap(resizedPixels, resizedWidth, newNewHeight).getPixels(newPixels, 0, resizedWidth, 0, 0, resizedWidth, newNewHeight)
+            return PixelsArray(
+                newPixels,
+                resizedWidth,
+                newNewHeight
+            )
+        }
     }
 
     fun clearCanvas() {

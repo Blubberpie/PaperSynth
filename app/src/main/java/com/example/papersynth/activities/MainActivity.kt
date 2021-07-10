@@ -3,15 +3,15 @@ package com.example.papersynth.activities
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Button
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.add
 import androidx.fragment.app.commit
-import com.example.papersynth.fragments.CanvasFragment
+import androidx.lifecycle.ViewModelProvider
 import com.example.papersynth.PlaybackEngine.create
 import com.example.papersynth.PlaybackEngine.delete
 import com.example.papersynth.PlaybackEngine.setChannelCount
@@ -19,10 +19,13 @@ import com.example.papersynth.PlaybackEngine.start
 import com.example.papersynth.PlaybackEngine.stop
 import com.example.papersynth.R
 import com.example.papersynth.dataclasses.FourierSeries
+import com.example.papersynth.dataclasses.PixelsArray
 import com.example.papersynth.enums.MusicalScale
+import com.example.papersynth.fragments.CanvasFragment
 import com.example.papersynth.fragments.ScalesDialog
 import com.example.papersynth.utils.CurveFittingUtil
 import com.example.papersynth.utils.FileUtil
+import com.example.papersynth.viewmodels.ScaleViewModel
 import kotlin.math.PI
 
 private const val NUM_SAMPLES = 256
@@ -31,7 +34,10 @@ private const val HALF_WAVE_CYCLE = NUM_SAMPLES / (2 * PI.toFloat())
 class MainActivity : AppCompatActivity(), View.OnClickListener, ScalesDialog.ScalesDialogListener {
 
     private lateinit var fourierSeries: ArrayList<FourierSeries>
-    private var selectedScale: MusicalScale = MusicalScale.CHROMATIC
+
+    private val scaleViewModel: ScaleViewModel by viewModels()
+    private var selectedScale = MusicalScale.CHROMATIC
+    private var canvasHeight = 88
 
     @Override
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -108,7 +114,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, ScalesDialog.Sca
     }
 
     override fun onSelectScale(dialog: DialogFragment, selectedScale: MusicalScale) {
+        scaleViewModel.setScale(selectedScale)
         this.selectedScale = selectedScale
+        recalculateCanvasHeight()
         restartAll()
     }
 
@@ -120,7 +128,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, ScalesDialog.Sca
     }
 
     private fun createAndStartEngine() {
-        create(this, fourierSeries, selectedScale)
+        create(this, fourierSeries, selectedScale, canvasHeight)
         setChannelCount(2) // stereo
         val result = start()
         if (result != 0) {
@@ -161,5 +169,23 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, ScalesDialog.Sca
     private fun restartAll() {
         stopAndDeleteEngine()
         createAndStartEngine()
+    }
+
+    private fun recalculateCanvasHeight() {
+        canvasHeight = if (selectedScale.compareTo(MusicalScale.CHROMATIC) == 0) {
+            88
+        } else if (
+            selectedScale.compareTo(MusicalScale.WHOLE_TONE) == 0
+            || selectedScale.compareTo(MusicalScale.BLUES_HEXATONIC) == 0
+        ) {
+            42 // 6
+        } else if (
+            selectedScale.compareTo(MusicalScale.AKEBONO) == 0
+            || selectedScale.compareTo(MusicalScale.PENTATONIC) == 0
+        ) {
+            35 // 5
+        } else {
+            50 // 7
+        }
     }
 }

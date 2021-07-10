@@ -10,7 +10,12 @@ import org.jetbrains.kotlinx.multik.ndarray.operations.toList
 
 object PlaybackEngine {
     private var mEngineHandle: Long = 0
-    fun create(context: Context, fourierSeries: ArrayList<FourierSeries>, scale: MusicalScale): Boolean {
+    fun create(
+        context: Context,
+        fourierSeries: ArrayList<FourierSeries>,
+        scale: MusicalScale,
+        canvasHeight: Int
+    ): Boolean {
         if (mEngineHandle == 0L) {
             setDefaultStreamValues(context)
             // TODO: Pressed for time. VERY BAD CODE LOL
@@ -27,7 +32,8 @@ object PlaybackEngine {
                 fourierSeries[2].coefficientsB.toList().toFloatArray(),
                 fourierSeries[2].numTerms,
                 fourierSeries[2].a0,
-                scale.ordinal
+                scale.ordinal,
+                canvasHeight
             )
         }
         return mEngineHandle != 0L
@@ -116,7 +122,8 @@ object PlaybackEngine {
         coefficientsB3: FloatArray,
         numTerms3: Int,
         a03: Float,
-        scaleOrdinal: Int
+        scaleOrdinal: Int,
+        canvasHeight: Int
     ): Long
     private external fun nativeStartEngine(engineHandle: Long): Int
     private external fun nativeStopEngine(engineHandle: Long): Int

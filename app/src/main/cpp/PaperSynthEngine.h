@@ -22,7 +22,7 @@ constexpr int32_t BUFFER_SIZE_AUTOMATIC = 0;
 
 class PaperSynthEngine : public IRestartable {
 public:
-    PaperSynthEngine(std::vector<FourierSeries> fourierSeries, int scaleOrdinal);
+    PaperSynthEngine(std::vector<FourierSeries> fourierSeries, int scaleOrdinal, int canvasHeight);
     virtual  ~PaperSynthEngine() = default;
 
     void tap(bool isDown);
@@ -77,6 +77,7 @@ private:
     std::shared_ptr<PaperSynthSoundGenerator> audioSource_;
     bool isLatencyDetectionSupported_ = false;
     int scaleOrdinal_ = 0;
+    int canvasHeight_ = 88;
 
     int32_t        deviceId_ = oboe::Unspecified;
     int32_t        channelCount_ = oboe::Unspecified;

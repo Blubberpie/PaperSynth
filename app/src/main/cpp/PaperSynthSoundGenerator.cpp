@@ -8,10 +8,12 @@ PaperSynthSoundGenerator::PaperSynthSoundGenerator(
         int32_t sampleRate,
         int32_t channelCount,
         const std::vector<FourierSeries>& fourierSeries,
-        int scaleOrdinal
+        int scaleOrdinal,
+        int canvasHeight
 )
         : TappableAudioSource(sampleRate, channelCount) {
 
+    numOscs_ = canvasHeight;
     scaleOrdinal_ = scaleOrdinal;
     float amplitude = 1.0f / (float)numOscs_; // TODO: make dynamic
     float ampSplit = amplitude / 3.0f;

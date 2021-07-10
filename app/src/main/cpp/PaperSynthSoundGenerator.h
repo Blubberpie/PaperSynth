@@ -42,7 +42,8 @@ public:
             int32_t sampleRate,
             int32_t channelCount,
             const std::vector<FourierSeries>& fourierSeries,
-            int scaleOrdinal);
+            int scaleOrdinal,
+            int canvasHeight);
     ~PaperSynthSoundGenerator() = default;
 
     PaperSynthSoundGenerator(PaperSynthSoundGenerator&& other) = default;
