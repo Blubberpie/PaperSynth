@@ -51,20 +51,38 @@
 
     <Button
         android:id="@+id/btn_toggle_grid"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:insetTop="0dp"
+        android:insetBottom="8dp"
+        android:text="#"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textColor="@color/brushL"
+        android:textSize="16sp"
+        app:backgroundTint="@color/elementD"
+        app:layout_constraintHorizontal_weight="0.5"
+        app:layout_constraintStart_toEndOf="@+id/fragment_container_view"
+        app:layout_constraintTop_toBottomOf="@+id/btn_save_canvas" />
+
+    <Button
+        android:id="@+id/btn_choose_scale"
         android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:insetTop="0dp"
         android:insetBottom="8dp"
-        android:text="SHOW/HIDE GRID"
+        android:text="SCALE"
         android:textAppearance="@style/TextAppearance.AppCompat.Small"
         android:textColor="@color/brushL"
         android:textSize="12sp"
+        android:textStyle="bold"
         app:backgroundTint="@color/elementD"
+        app:layout_constraintBottom_toTopOf="@+id/btn_color_picker"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_weight="0.5"
-        app:layout_constraintStart_toEndOf="@+id/fragment_container_view"
+        app:layout_constraintStart_toEndOf="@+id/btn_toggle_grid"
         app:layout_constraintTop_toBottomOf="@+id/btn_save_canvas" />
 
     <Button
@@ -143,7 +161,7 @@
     <Button
         android:id="@+id/btn_oscillator_activity"
         android:layout_width="0dp"
-        android:layout_height="80dp"
+        android:layout_height="70dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="4dp"
         android:insetTop="8dp"
@@ -161,7 +179,7 @@
     <Button
         android:id="@+id/btn_apply_wave"
         android:layout_width="0dp"
-        android:layout_height="80dp"
+        android:layout_height="70dp"
         android:layout_marginStart="4dp"
         android:layout_marginEnd="8dp"
         android:insetTop="8dp"

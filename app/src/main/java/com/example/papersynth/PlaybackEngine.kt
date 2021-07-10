@@ -5,11 +5,12 @@ import android.media.AudioManager
 import android.os.Build
 import com.example.papersynth.dataclasses.PixelsArray
 import com.example.papersynth.dataclasses.FourierSeries
+import com.example.papersynth.enums.MusicalScale
 import org.jetbrains.kotlinx.multik.ndarray.operations.toList
 
 object PlaybackEngine {
     private var mEngineHandle: Long = 0
-    fun create(context: Context, fourierSeries: ArrayList<FourierSeries>): Boolean {
+    fun create(context: Context, fourierSeries: ArrayList<FourierSeries>, scale: MusicalScale): Boolean {
         if (mEngineHandle == 0L) {
             setDefaultStreamValues(context)
             // TODO: Pressed for time. VERY BAD CODE LOL
@@ -25,7 +26,8 @@ object PlaybackEngine {
                 fourierSeries[2].coefficientsA.toList().toFloatArray(),
                 fourierSeries[2].coefficientsB.toList().toFloatArray(),
                 fourierSeries[2].numTerms,
-                fourierSeries[2].a0
+                fourierSeries[2].a0,
+                scale.ordinal
             )
         }
         return mEngineHandle != 0L
@@ -114,6 +116,7 @@ object PlaybackEngine {
         coefficientsB3: FloatArray,
         numTerms3: Int,
         a03: Float,
+        scaleOrdinal: Int
     ): Long
     private external fun nativeStartEngine(engineHandle: Long): Int
     private external fun nativeStopEngine(engineHandle: Long): Int

@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.add
 import androidx.fragment.app.commit
 import com.example.papersynth.fragments.CanvasFragment
@@ -18,6 +19,8 @@ import com.example.papersynth.PlaybackEngine.start
 import com.example.papersynth.PlaybackEngine.stop
 import com.example.papersynth.R
 import com.example.papersynth.dataclasses.FourierSeries
+import com.example.papersynth.enums.MusicalScale
+import com.example.papersynth.fragments.ScalesDialog
 import com.example.papersynth.utils.CurveFittingUtil
 import com.example.papersynth.utils.FileUtil
 import kotlin.math.PI
@@ -25,9 +28,10 @@ import kotlin.math.PI
 private const val NUM_SAMPLES = 256
 private const val HALF_WAVE_CYCLE = NUM_SAMPLES / (2 * PI.toFloat())
 
-class MainActivity : AppCompatActivity(), View.OnClickListener {
+class MainActivity : AppCompatActivity(), View.OnClickListener, ScalesDialog.ScalesDialogListener {
 
     private lateinit var fourierSeries: ArrayList<FourierSeries>
+    private var selectedScale: MusicalScale = MusicalScale.CHROMATIC
 
     @Override
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,6 +66,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         oscillatorActivityButton.setOnClickListener(this)
         val applyWaveButton = findViewById<Button>(R.id.btn_apply_wave)
         applyWaveButton.setOnClickListener(this)
+        val chooseScaleButton = findViewById<Button>(R.id.btn_choose_scale)
+        chooseScaleButton.setOnClickListener(this)
     }
 
     /*
@@ -86,10 +92,27 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 openOscillatorCanvas()
             }
             R.id.btn_apply_wave -> {
+                applyWave()
                 restartAll()
+            }
+            R.id.btn_choose_scale -> {
+                ScalesDialog().show(supportFragmentManager, "ScalesDialog")
             }
         }
     }
+
+    /// DIALOG FUNCTIONS ///
+
+    override fun onDialogCancelClick(dialog: DialogFragment) {
+        println("cancelled")
+    }
+
+    override fun onSelectScale(dialog: DialogFragment, selectedScale: MusicalScale) {
+        this.selectedScale = selectedScale
+        restartAll()
+    }
+
+    /// MAIN ACTIVITY FUNCTIONS ///
 
     private fun openOscillatorCanvas() {
         val oscillatorCanvasIntent = Intent(this@MainActivity, OscillatorCanvasActivity::class.java)
@@ -97,7 +120,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun createAndStartEngine() {
-        create(this, fourierSeries)
+        create(this, fourierSeries, selectedScale)
         setChannelCount(2) // stereo
         val result = start()
         if (result != 0) {
@@ -136,7 +159,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun restartAll() {
-        applyWave()
         stopAndDeleteEngine()
         createAndStartEngine()
     }

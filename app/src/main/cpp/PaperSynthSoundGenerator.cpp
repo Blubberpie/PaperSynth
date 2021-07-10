@@ -7,17 +7,24 @@
 PaperSynthSoundGenerator::PaperSynthSoundGenerator(
         int32_t sampleRate,
         int32_t channelCount,
-        const std::vector<FourierSeries>& fourierSeries
+        const std::vector<FourierSeries>& fourierSeries,
+        int scaleOrdinal
 )
         : TappableAudioSource(sampleRate, channelCount) {
 
-//    lastPitchChangeTime_ = high_resolution_clock::now();
+    scaleOrdinal_ = scaleOrdinal;
     float amplitude = 1.0f / (float)numOscs_; // TODO: make dynamic
     float ampSplit = amplitude / 3.0f;
 
     for (const FourierSeries& fs : fourierSeries) {
         fourierWaves_.push_back(calculateFourierWave(fs, 1024));
     }
+
+    std::vector<int> intervals = scaleIntervals_[scaleOrdinal];
+    int intervalsSize = static_cast<int>(intervals.size());
+    int curInterval = intervalsSize - 1;
+
+    bool rise = false;
 
     for (int i = 0; i < numOscs_; ++i) {
         auto osc = new PaperSynthOscillator(&fourierWaves_); // TODO: handle delete?? somehow?
@@ -26,9 +33,16 @@ PaperSynthSoundGenerator::PaperSynthSoundGenerator(
         osc->setAmplitudes(ampSplit, ampSplit, ampSplit);
         oscillators_.push_back(osc);
         mixer_.addTrack(osc);
-        curFrequency = curFrequency / INTERVAL_SEMITONE;
-        if (curFrequency <= MINIMUM_FREQUENCY) {
-            curFrequency = MAXIMUM_FREQUENCY;
+        if (rise) {
+            curFrequency = curFrequency * getIntervalFreq(intervals[curInterval]);
+            curInterval++;
+            if (curInterval >= intervalsSize) curInterval = 0;
+            if (curFrequency >= MAXIMUM_FREQUENCY) rise = false;
+        } else {
+            curFrequency = curFrequency / getIntervalFreq(intervals[curInterval]);
+            curInterval--;
+            if (curInterval < 0) curInterval = intervalsSize - 1;
+            if (curFrequency <= MINIMUM_FREQUENCY) rise = true;
         }
     }
 
@@ -115,4 +129,8 @@ Eigen::Array<float, 1, Eigen::Dynamic>
 PaperSynthSoundGenerator::calculateFrequency(int k, const Eigen::Array<float, 1, Eigen::Dynamic>& xs, float period) {
     float timesVal = M_PI * (k + 1) / period;
     return xs.operator*(timesVal);
+}
+
+double PaperSynthSoundGenerator::getIntervalFreq(int interval) {
+    return pow(2, interval/12.0);
 }

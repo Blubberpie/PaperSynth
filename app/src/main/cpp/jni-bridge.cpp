@@ -52,7 +52,8 @@ Java_com_example_papersynth_PlaybackEngine_nativeCreateEngine(
         jfloatArray jCoefficientsA3,
         jfloatArray jCoefficientsB3,
         jint jNumTerms3,
-        jfloat jA03
+        jfloat jA03,
+        jint scaleOrdinal
 ) {
 
     std::vector<float> coefficientsA1 = convertJavaFloatArrayToVector(env, jCoefficientsA1);
@@ -69,7 +70,7 @@ Java_com_example_papersynth_PlaybackEngine_nativeCreateEngine(
     series.emplace_back(FourierSeries(coefficientsA3, coefficientsB3, jNumTerms3, jA03));
 
     // We use std::nothrow so `new` returns a nullptr if the engine creation fails
-    auto *engine = new(std::nothrow) PaperSynthEngine(series);
+    auto *engine = new(std::nothrow) PaperSynthEngine(series, scaleOrdinal);
     if (engine == nullptr) {
         LOGE("Could not instantiate PaperSynthEngine");
         return 0;

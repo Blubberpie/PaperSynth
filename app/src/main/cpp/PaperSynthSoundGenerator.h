@@ -16,15 +16,13 @@
 #include <chrono>
 #include <vector>
 #include <cmath>
+#include <map>
 
 using std::chrono::high_resolution_clock;
 using std::chrono::duration;
 
 const double MAXIMUM_FREQUENCY = 8372.0180896191563096911; // C9
 const double MINIMUM_FREQUENCY = 55.0; // very low A
-
-const double INTERVAL_PERFECT_FIFTH = pow(2, 7.0/12);
-const double INTERVAL_SEMITONE = pow(2, 1.0/12);
 
 class PaperSynthSoundGenerator : public TappableAudioSource {
     static constexpr size_t SHARED_BUFFER_SIZE = 1024;
@@ -43,7 +41,8 @@ public:
     PaperSynthSoundGenerator(
             int32_t sampleRate,
             int32_t channelCount,
-            const std::vector<FourierSeries>& fourierSeries);
+            const std::vector<FourierSeries>& fourierSeries,
+            int scaleOrdinal);
     ~PaperSynthSoundGenerator() = default;
 
     PaperSynthSoundGenerator(PaperSynthSoundGenerator&& other) = default;
@@ -68,6 +67,7 @@ private:
     IRenderableAudio *outputStage_; // This will point to either the mixer or converter, so it needs to be raw
 
     int numOscs_ = 88;
+    int scaleOrdinal_;
 
     std::vector<int> pixelsArray_;
     int pixelsArrayWidth_ = 0;
@@ -82,6 +82,19 @@ private:
 
     void processPixelsArray(bool disableAll=false);
     static Eigen::Array<float, 1, Eigen::Dynamic> calculateFrequency(int k, const Eigen::Array<float, 1, Eigen::Dynamic>& xs, float period);
+    static double getIntervalFreq(int interval);
+
+    std::vector<std::vector<int>> scaleIntervals_{
+            {1,1,1,1,1,1,1,1,1,1,1,1}, // chromatic
+            {2,2,2,2,2,2}, // whole tone
+            {2,2,1,2,2,2,1}, // diatonic
+            {2,1,2,2,1,3,1}, // harmonic minor
+            {1,3,1,2,1,3,1}, // byzantine
+            {2,2,3,2,3}, // pentatonic
+            {2,1,4,1,4}, // akebono
+            {3,2,1,1,3,2}, // blues hexatonic
+            {2,1,3,1,1,3,1} // hungarian minor
+    };
 };
 
 
