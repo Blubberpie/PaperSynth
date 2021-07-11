@@ -48,14 +48,29 @@ class CanvasFragment : Fragment(R.layout.fragment_canvas), View.OnClickListener 
         savedInstanceState: Bundle?
     ): View? {
 
+        val view = inflater.inflate(R.layout.fragment_canvas, container, false)
+        canvasView = view.findViewById(R.id.canvas_view)
         activity?.let {
             scaleViewModel.selectedScale.observe(it) { scale ->
                 selectedScale = scale
+                val thickness = if (selectedScale.compareTo(MusicalScale.CHROMATIC) == 0) {
+                    0
+                } else if (
+                    selectedScale.compareTo(MusicalScale.WHOLE_TONE) == 0
+                    || selectedScale.compareTo(MusicalScale.BLUES_HEXATONIC) == 0
+                ) {
+                    2 // 6
+                } else if (
+                    selectedScale.compareTo(MusicalScale.AKEBONO) == 0
+                    || selectedScale.compareTo(MusicalScale.PENTATONIC) == 0
+                ) {
+                    3 // 5
+                } else {
+                    1 // 7
+                }
+                canvasView.setStrokeWidth(thickness)
             }
         }
-
-        val view = inflater.inflate(R.layout.fragment_canvas, container, false)
-        canvasView = view.findViewById(R.id.canvas_view)
         colors = intArrayOf(
             ResourcesCompat.getColor(resources, R.color.brushL, null),
             ResourcesCompat.getColor(resources, R.color.redD, null),

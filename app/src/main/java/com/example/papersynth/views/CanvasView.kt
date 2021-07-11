@@ -6,8 +6,10 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.widget.ImageView
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.alpha
+import androidx.core.graphics.applyCanvas
 import com.example.papersynth.R
 import com.example.papersynth.dataclasses.PixelsArray
 import com.example.papersynth.enums.MusicalScale
@@ -295,5 +297,15 @@ class CanvasView : View {
 
     fun getCurrentColor(): Int {
         return brushColor
+    }
+
+    fun setStrokeWidth(thickness: Int) {
+        when (thickness) {
+            1 -> brush.strokeWidth = STROKE_WIDTH * 1.5f
+            2 -> brush.strokeWidth = STROKE_WIDTH * 2f
+            3 -> brush.strokeWidth = STROKE_WIDTH * 2.5f
+            else -> brush.strokeWidth = STROKE_WIDTH
+        }
+        invalidate()
     }
 }
