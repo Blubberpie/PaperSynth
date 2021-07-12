@@ -4,6 +4,7 @@
 
 #include "PaperSynthEngine.h"
 #include "FourierSeries.h"
+#include "FFTUtil.h"
 #include <logging_macros.h>
 
 std::vector<int> convertJavaIntArrayToVector(JNIEnv *env, jintArray intArray) {
@@ -38,7 +39,7 @@ extern "C" {
  * @return a pointer to the audio engine. This should be passed to other methods
  */
 JNIEXPORT jlong JNICALL
-Java_com_example_papersynth_PlaybackEngine_nativeCreateEngine(
+Java_com_example_papersynth_jni_PlaybackEngine_nativeCreateEngine(
         JNIEnv *env,
         jobject thiz,
         jfloatArray jCoefficientsA1,
@@ -80,7 +81,7 @@ Java_com_example_papersynth_PlaybackEngine_nativeCreateEngine(
 }
 
 JNIEXPORT jint JNICALL
-Java_com_example_papersynth_PlaybackEngine_nativeStartEngine(
+Java_com_example_papersynth_jni_PlaybackEngine_nativeStartEngine(
         JNIEnv *env,
         jobject,
         jlong engineHandle) {
@@ -90,7 +91,7 @@ Java_com_example_papersynth_PlaybackEngine_nativeStartEngine(
 }
 
 JNIEXPORT jint JNICALL
-Java_com_example_papersynth_PlaybackEngine_nativeStopEngine(
+Java_com_example_papersynth_jni_PlaybackEngine_nativeStopEngine(
         JNIEnv *env,
         jobject,
         jlong engineHandle) {
@@ -100,7 +101,7 @@ Java_com_example_papersynth_PlaybackEngine_nativeStopEngine(
 }
 
 JNIEXPORT void JNICALL
-Java_com_example_papersynth_PlaybackEngine_nativeDeleteEngine(
+Java_com_example_papersynth_jni_PlaybackEngine_nativeDeleteEngine(
         JNIEnv *env,
         jobject,
         jlong engineHandle) {
@@ -111,7 +112,7 @@ Java_com_example_papersynth_PlaybackEngine_nativeDeleteEngine(
 }
 
 JNIEXPORT void JNICALL
-Java_com_example_papersynth_PlaybackEngine_nativeSetToneOn(
+Java_com_example_papersynth_jni_PlaybackEngine_nativeSetToneOn(
         JNIEnv *env,
         jobject,
         jlong engineHandle,
@@ -126,7 +127,7 @@ Java_com_example_papersynth_PlaybackEngine_nativeSetToneOn(
 }
 
 JNIEXPORT void JNICALL
-Java_com_example_papersynth_PlaybackEngine_nativeSetAudioApi(
+Java_com_example_papersynth_jni_PlaybackEngine_nativeSetAudioApi(
         JNIEnv *env,
         jobject type,
         jlong engineHandle,
@@ -143,7 +144,7 @@ Java_com_example_papersynth_PlaybackEngine_nativeSetAudioApi(
 }
 
 JNIEXPORT void JNICALL
-Java_com_example_papersynth_PlaybackEngine_nativeSetAudioDeviceId(
+Java_com_example_papersynth_jni_PlaybackEngine_nativeSetAudioDeviceId(
         JNIEnv *env,
         jobject,
         jlong engineHandle,
@@ -158,7 +159,7 @@ Java_com_example_papersynth_PlaybackEngine_nativeSetAudioDeviceId(
 }
 
 JNIEXPORT void JNICALL
-Java_com_example_papersynth_PlaybackEngine_nativeSetChannelCount(
+Java_com_example_papersynth_jni_PlaybackEngine_nativeSetChannelCount(
         JNIEnv *env,
         jobject type,
         jlong engineHandle,
@@ -173,7 +174,7 @@ Java_com_example_papersynth_PlaybackEngine_nativeSetChannelCount(
 }
 
 JNIEXPORT void JNICALL
-Java_com_example_papersynth_PlaybackEngine_nativeSetBufferSizeInBursts(
+Java_com_example_papersynth_jni_PlaybackEngine_nativeSetBufferSizeInBursts(
         JNIEnv *env,
         jobject,
         jlong engineHandle,
@@ -189,7 +190,7 @@ Java_com_example_papersynth_PlaybackEngine_nativeSetBufferSizeInBursts(
 
 
 JNIEXPORT jdouble JNICALL
-Java_com_example_papersynth_PlaybackEngine_nativeGetCurrentOutputLatencyMillis(
+Java_com_example_papersynth_jni_PlaybackEngine_nativeGetCurrentOutputLatencyMillis(
         JNIEnv *env,
         jobject,
         jlong engineHandle) {
@@ -203,7 +204,7 @@ Java_com_example_papersynth_PlaybackEngine_nativeGetCurrentOutputLatencyMillis(
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_example_papersynth_PlaybackEngine_nativeIsLatencyDetectionSupported(
+Java_com_example_papersynth_jni_PlaybackEngine_nativeIsLatencyDetectionSupported(
         JNIEnv *env,
         jobject type,
         jlong engineHandle) {
@@ -217,7 +218,7 @@ Java_com_example_papersynth_PlaybackEngine_nativeIsLatencyDetectionSupported(
 }
 
 JNIEXPORT void JNICALL
-Java_com_example_papersynth_PlaybackEngine_nativeSetDefaultStreamValues(
+Java_com_example_papersynth_jni_PlaybackEngine_nativeSetDefaultStreamValues(
         JNIEnv *env,
         jobject type,
         jint sampleRate,
@@ -227,7 +228,7 @@ Java_com_example_papersynth_PlaybackEngine_nativeSetDefaultStreamValues(
 }
 
 JNIEXPORT void JNICALL
-Java_com_example_papersynth_PlaybackEngine_nativeSetPixelsArray(
+Java_com_example_papersynth_jni_PlaybackEngine_nativeSetPixelsArray(
         JNIEnv *env,
         jobject type,
         jlong engineHandle,
@@ -243,6 +244,30 @@ Java_com_example_papersynth_PlaybackEngine_nativeSetPixelsArray(
     } else {
         LOGE("Engine handle is invalid, call createEngine() to create a new one");
     }
+}
+
+JNIEXPORT jfloatArray JNICALL
+Java_com_example_papersynth_jni_FFT_nativeOverSample(
+        JNIEnv *env,
+        jobject type,
+        jfloatArray jSamples,
+        jint numSamples,
+        jint oversampleFactor) {
+
+    int oversampledLen = numSamples * oversampleFactor;
+
+    jfloatArray result;
+    result = env->NewFloatArray(oversampledLen);
+
+    float *samples = env->GetFloatArrayElements(jSamples, nullptr);
+    env->ReleaseFloatArrayElements(jSamples, samples, 0);
+    float waveOversample[oversampledLen];
+
+    FFTUtil::oversample(samples, waveOversample, numSamples, oversampleFactor);
+
+    env->SetFloatArrayRegion(result, 0, oversampledLen, waveOversample);
+
+    return result;
 }
 
 }

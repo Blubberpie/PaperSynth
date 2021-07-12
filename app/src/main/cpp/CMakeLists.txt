@@ -35,6 +35,9 @@ set (
         PaperSynthEngine.cpp
         PaperSynthMixer.cpp
         FourierSeries.cpp
+        FFTUtil.cpp
+        pffft/pffft.c
+        pffft/fftpack.c
 )
 
 # Creates and names a library, sets it as either STATIC
@@ -56,4 +59,4 @@ target_link_libraries(papersynth android oboe ${log-lib})
 
 # Enable optimization flags: if having problems with source level debugging,
 # disable -Ofast ( and debug ), re-enable after done debugging.
-target_compile_options(papersynth PRIVATE -Wall -Werror "$<$<CONFIG:RELEASE>:-Ofast>")
+target_compile_options(papersynth PRIVATE -Wall -Werror -DPFFFT_SIMD_DISABLE "$<$<CONFIG:RELEASE>:-Ofast>")
