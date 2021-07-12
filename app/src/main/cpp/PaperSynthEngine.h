@@ -11,7 +11,6 @@
 #include <DefaultErrorCallback.h>
 #include <logging_macros.h>
 
-#include "FourierSeries.h"
 #include "PaperSynthOscillator.h"
 #include "PaperSynthLatencyTuningCallback.h"
 #include "PaperSynthSoundGenerator.h"

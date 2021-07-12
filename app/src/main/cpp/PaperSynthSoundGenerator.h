@@ -7,8 +7,6 @@
 
 #include "PaperSynthOscillator.h"
 #include "PaperSynthMixer.h"
-#include "FourierSeries.h"
-#include "Eigen/Dense"
 #include "FFTUtil.h"
 
 #include <oboe/Oboe.h>
@@ -73,9 +71,9 @@ private:
     std::vector<int> pixelsArray_;
     int pixelsArrayWidth_ = 0;
     int pixelsArrayHeight_ = 0;
-    float wave1_[1024];
-    float wave2_[1024];
-    float wave3_[1024];
+    float wave1_[1024]{};
+    float wave2_[1024]{};
+    float wave3_[1024]{};
 
     high_resolution_clock::time_point lastSweepTime_;
     bool waveIsOn_ = false;

@@ -3,7 +3,6 @@
 #include <android/input.h>
 
 #include "PaperSynthEngine.h"
-#include "FourierSeries.h"
 #include "FFTUtil.h"
 #include <logging_macros.h>
 

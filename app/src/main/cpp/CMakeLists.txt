@@ -17,9 +17,6 @@ add_subdirectory (${OBOE_DIR} ./oboe)
 # Make the Oboe header files available to our app
 include_directories (${OBOE_DIR}/include ${OBOE_DIR}/samples/shared)
 
-# Eigen
-include_directories(Eigen)
-
 # Debug utilities
 set (DEBUG_UTILS_PATH "${OBOE_DIR}/samples/debug-utils")
 set (DEBUG_UTILS_SOURCES ${DEBUG_UTILS_PATH}/trace.cpp)
@@ -34,7 +31,6 @@ set (
         PaperSynthLatencyTuningCallback.cpp
         PaperSynthEngine.cpp
         PaperSynthMixer.cpp
-        FourierSeries.cpp
         FFTUtil.cpp
         pffft/pffft.c
         pffft/fftpack.c
