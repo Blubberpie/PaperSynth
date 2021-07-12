@@ -10,11 +10,11 @@
 #include "PaperSynthEngine.h"
 #include "PaperSynthOscillator.h"
 
-PaperSynthEngine::PaperSynthEngine(std::vector<FourierSeries> fourierSeries, int scaleOrdinal, int canvasHeight)
+PaperSynthEngine::PaperSynthEngine(std::vector<float*> waveForms, int scaleOrdinal, int canvasHeight)
         : latencyCallback_(std::make_unique<PaperSynthLatencyTuningCallback>())
         , errorCallback_(std::make_unique<DefaultErrorCallback>(*this)){
 
-        fourierSeries_ = std::move(fourierSeries);
+        waveForms_ = std::move(waveForms);
         scaleOrdinal_ = scaleOrdinal;
         canvasHeight_ = canvasHeight;
 }
@@ -33,7 +33,7 @@ oboe::Result PaperSynthEngine::start() {
         audioSource_ =  std::make_shared<PaperSynthSoundGenerator>(
                 stream_->getSampleRate(),
                 stream_->getChannelCount(),
-                fourierSeries_,
+                waveForms_,
                 scaleOrdinal_,
                 canvasHeight_);
         latencyCallback_->setSource(std::dynamic_pointer_cast<IRenderableAudio>(audioSource_));

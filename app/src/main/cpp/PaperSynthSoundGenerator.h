@@ -9,6 +9,7 @@
 #include "PaperSynthMixer.h"
 #include "FourierSeries.h"
 #include "Eigen/Dense"
+#include "FFTUtil.h"
 
 #include <oboe/Oboe.h>
 #include <TappableAudioSource.h>
@@ -41,7 +42,7 @@ public:
     PaperSynthSoundGenerator(
             int32_t sampleRate,
             int32_t channelCount,
-            const std::vector<FourierSeries>& fourierSeries,
+            const std::vector<float*>& waveForms,
             int scaleOrdinal,
             int canvasHeight);
     ~PaperSynthSoundGenerator() = default;
@@ -59,7 +60,6 @@ public:
         pixelsArrayWidth_ = width;
         pixelsArrayHeight_ = height;
     }
-    static Eigen::Array<float, 1, Eigen::Dynamic> calculateFourierWave(const FourierSeries& fourierSeries, int n);
 
 private:
     std::vector<PaperSynthOscillator*> oscillators_;
@@ -73,7 +73,9 @@ private:
     std::vector<int> pixelsArray_;
     int pixelsArrayWidth_ = 0;
     int pixelsArrayHeight_ = 0;
-    std::vector<Eigen::Array<float, 1, Eigen::Dynamic>> fourierWaves_;
+    float wave1_[1024];
+    float wave2_[1024];
+    float wave3_[1024];
 
     high_resolution_clock::time_point lastSweepTime_;
     bool waveIsOn_ = false;
@@ -82,7 +84,6 @@ private:
     int curSweepPosition_ = 0;
 
     void processPixelsArray(bool disableAll=false);
-    static Eigen::Array<float, 1, Eigen::Dynamic> calculateFrequency(int k, const Eigen::Array<float, 1, Eigen::Dynamic>& xs, float period);
     static double getIntervalFreq(int interval);
 
     std::vector<std::vector<int>> scaleIntervals_{

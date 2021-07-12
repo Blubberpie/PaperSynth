@@ -6,8 +6,10 @@
 
 #include <utility>
 
-PaperSynthOscillator::PaperSynthOscillator(std::vector<Eigen::Array<float, 1, Eigen::Dynamic>> *fourierWaves) {
-    setFourierWaves(fourierWaves);
+PaperSynthOscillator::PaperSynthOscillator(float *wave1,
+                                           float *wave2,
+                                           float *wave3) {
+    setOversampledWaves(wave1, wave2, wave3);
 }
 
 void PaperSynthOscillator::renderAudio(float *audioData, int32_t numFrames) {
@@ -18,9 +20,9 @@ void PaperSynthOscillator::renderAudio(float *audioData, int32_t numFrames) {
             if (pos < 0) pos = 0;
             else if (pos >= 1024) pos = 1023;
             audioData[i] =
-                    (fourierWaves_->at(0)(pos) * amplitude1_)
-                    + (fourierWaves_->at(1)(pos) * amplitude2_)
-                    + (fourierWaves_->at(2)(pos) * amplitude3_);
+                    (wave1_[pos] * amplitude1_)
+                    + (wave2_[pos] * amplitude2_)
+                    + (wave3_[pos] * amplitude3_);
 
             phase_ += phaseIncrement_;
             if (phase_ > TWO_PI) phase_ -= TWO_PI;
@@ -44,8 +46,12 @@ void PaperSynthOscillator::setFrequency(double frequency) {
     updatePhaseIncrement();
 }
 
-void PaperSynthOscillator::setFourierWaves(std::vector<Eigen::Array<float, 1, Eigen::Dynamic>> *fourierWaves) {
-    fourierWaves_ = fourierWaves;
+void PaperSynthOscillator::setOversampledWaves(float *wave1,
+                                               float *wave2,
+                                               float *wave3) {
+    wave1_ = wave1;
+    wave2_ = wave2;
+    wave3_ = wave3;
 }
 
 /// PRIVATE ///

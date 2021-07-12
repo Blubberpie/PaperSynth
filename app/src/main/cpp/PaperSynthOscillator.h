@@ -26,10 +26,15 @@ constexpr double TWO_PI = PI * 2;
 
 class PaperSynthOscillator : public IRenderableAudio {
 public:
-    PaperSynthOscillator(std::vector<Eigen::Array<float, 1, Eigen::Dynamic>> *fourierWaves);
+    PaperSynthOscillator(
+            float *wave1,
+            float *wave2,
+            float *wave3);
     ~PaperSynthOscillator() = default;
 
-    void setFourierWaves(std::vector<Eigen::Array<float, 1, Eigen::Dynamic>> *fourierWaves);
+    void setOversampledWaves(float *wave1,
+                             float *wave2,
+                             float *wave3);
     void setWaveOn(bool isWaveOn);
     void setSampleRate(int32_t sampleRate);
     void setFrequency(double frequency);
@@ -43,7 +48,9 @@ public:
     void renderAudio(float *audioData, int32_t numFrames) override;
 
 private:
-    std::vector<Eigen::Array<float, 1, Eigen::Dynamic>> *fourierWaves_{};
+    float *wave1_{};
+    float *wave2_{};
+    float *wave3_{};
     std::atomic<bool> isWaveOn_ { false };
     std::atomic<float> amplitude1_ { 0 };
     std::atomic<float> amplitude2_ { 0 };

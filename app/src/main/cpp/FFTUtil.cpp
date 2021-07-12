@@ -1,6 +1,9 @@
 //
 // Created by lozbe on 7/12/2021.
 //
+// Code in this file is based on FFT methods from the WaveEdit repository:
+// https://github.com/AndrewBelt/WaveEdit/blob/master/src/math.cpp
+//
 
 #include "FFTUtil.h"
 

@@ -42,37 +42,25 @@ JNIEXPORT jlong JNICALL
 Java_com_example_papersynth_jni_PlaybackEngine_nativeCreateEngine(
         JNIEnv *env,
         jobject thiz,
-        jfloatArray jCoefficientsA1,
-        jfloatArray jCoefficientsB1,
-        jint jNumTerms1,
-        jfloat jA01,
-        jfloatArray jCoefficientsA2,
-        jfloatArray jCoefficientsB2,
-        jint jNumTerms2,
-        jfloat jA02,
-        jfloatArray jCoefficientsA3,
-        jfloatArray jCoefficientsB3,
-        jint jNumTerms3,
-        jfloat jA03,
+        jfloatArray jWave1,
+        jfloatArray jWave2,
+        jfloatArray jWave3,
         jint scaleOrdinal,
         jint canvasHeight
 ) {
 
-    std::vector<float> coefficientsA1 = convertJavaFloatArrayToVector(env, jCoefficientsA1);
-    std::vector<float> coefficientsB1 = convertJavaFloatArrayToVector(env, jCoefficientsB1);
-    std::vector<float> coefficientsA2 = convertJavaFloatArrayToVector(env, jCoefficientsA2);
-    std::vector<float> coefficientsB2 = convertJavaFloatArrayToVector(env, jCoefficientsB2);
-    std::vector<float> coefficientsA3 = convertJavaFloatArrayToVector(env, jCoefficientsA3);
-    std::vector<float> coefficientsB3 = convertJavaFloatArrayToVector(env, jCoefficientsB3);
+    float *wave1 = env->GetFloatArrayElements(jWave1, nullptr);
+    float *wave2 = env->GetFloatArrayElements(jWave2, nullptr);
+    float *wave3 = env->GetFloatArrayElements(jWave3, nullptr);
 
-    std::vector<FourierSeries> series;
+    std::vector<float*> waveForms;
 
-    series.emplace_back(FourierSeries(coefficientsA1, coefficientsB1, jNumTerms1, jA01));
-    series.emplace_back(FourierSeries(coefficientsA2, coefficientsB2, jNumTerms2, jA02));
-    series.emplace_back(FourierSeries(coefficientsA3, coefficientsB3, jNumTerms3, jA03));
+    waveForms.emplace_back(wave1);
+    waveForms.emplace_back(wave2);
+    waveForms.emplace_back(wave3);
 
     // We use std::nothrow so `new` returns a nullptr if the engine creation fails
-    auto *engine = new(std::nothrow) PaperSynthEngine(series, scaleOrdinal, canvasHeight);
+    auto *engine = new(std::nothrow) PaperSynthEngine(waveForms, scaleOrdinal, canvasHeight);
     if (engine == nullptr) {
         LOGE("Could not instantiate PaperSynthEngine");
         return 0;

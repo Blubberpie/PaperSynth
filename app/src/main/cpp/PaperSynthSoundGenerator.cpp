@@ -7,7 +7,7 @@
 PaperSynthSoundGenerator::PaperSynthSoundGenerator(
         int32_t sampleRate,
         int32_t channelCount,
-        const std::vector<FourierSeries>& fourierSeries,
+        const std::vector<float*>& waveForms,
         int scaleOrdinal,
         int canvasHeight
 )
@@ -18,9 +18,9 @@ PaperSynthSoundGenerator::PaperSynthSoundGenerator(
     float amplitude = 1.0f / (float)numOscs_; // TODO: make dynamic
     float ampSplit = amplitude / 3.0f;
 
-    for (const FourierSeries& fs : fourierSeries) {
-        fourierWaves_.push_back(calculateFourierWave(fs, 1024));
-    }
+    FFTUtil::oversample(waveForms.at(0), wave1_, 256, 4);
+    FFTUtil::oversample(waveForms.at(1), wave2_, 256, 4);
+    FFTUtil::oversample(waveForms.at(2), wave3_, 256, 4);
 
     std::vector<int> intervals = scaleIntervals_[scaleOrdinal];
     int intervalsSize = static_cast<int>(intervals.size());
@@ -29,7 +29,11 @@ PaperSynthSoundGenerator::PaperSynthSoundGenerator(
     bool rise = false;
 
     for (int i = 0; i < numOscs_; ++i) {
-        auto osc = new PaperSynthOscillator(&fourierWaves_); // TODO: handle delete?? somehow?
+        auto osc = new PaperSynthOscillator(
+                wave1_,
+                wave2_,
+                wave3_
+                ); // TODO: handle delete?? somehow?
         osc->setSampleRate(SAMPLE_RATE_DEFAULT);
         osc->setFrequency(curFrequency); // TODO: handle this
         osc->setAmplitudes(ampSplit, ampSplit, ampSplit);
@@ -98,39 +102,6 @@ void PaperSynthSoundGenerator::processPixelsArray(bool disableAll) {
             oscillators_[row]->setWaveOn(false);
         }
     }
-}
-
-Eigen::Array<float, 1, Eigen::Dynamic> PaperSynthSoundGenerator::calculateFourierWave(const FourierSeries& fourierSeries, int n) {
-    float stepSize = 1.0f / static_cast<float>(n);
-    float period = M_PI * 2;
-
-    // Initialize array of size n with values from range:
-    // 0 to period with stepSize
-    auto xs = Eigen::Array<float, 1, Eigen::Dynamic>(n);
-    float curX = 0 + stepSize;
-    for (int i = 0; i < n; i++) {
-        xs(i) = curX * period;
-        curX += stepSize;
-    }
-
-    // Initialize array of size n with a constant (A0 / 2)
-    auto ys = Eigen::Array<float, 1, Eigen::Dynamic>(n).operator=(fourierSeries.a0 / 2);
-
-    for (int k = 0; k < fourierSeries.numTerms; k++) {
-        auto calculatedFreq = calculateFrequency(k, xs, period);
-        auto calculatedA = calculatedFreq.cos().operator*(fourierSeries.coefficientsA[k]);
-        auto calculatedB = calculatedFreq.sin().operator*(fourierSeries.coefficientsB[k]);
-
-        ys.operator+=(calculatedA.operator+(calculatedB));
-    }
-
-    return ys;
-}
-
-Eigen::Array<float, 1, Eigen::Dynamic>
-PaperSynthSoundGenerator::calculateFrequency(int k, const Eigen::Array<float, 1, Eigen::Dynamic>& xs, float period) {
-    float timesVal = M_PI * (k + 1) / period;
-    return xs.operator*(timesVal);
 }
 
 double PaperSynthSoundGenerator::getIntervalFreq(int interval) {
