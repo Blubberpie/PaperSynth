@@ -11,29 +11,23 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.add
 import androidx.fragment.app.commit
-import androidx.lifecycle.ViewModelProvider
-import com.example.papersynth.PlaybackEngine.create
-import com.example.papersynth.PlaybackEngine.delete
-import com.example.papersynth.PlaybackEngine.setChannelCount
-import com.example.papersynth.PlaybackEngine.start
-import com.example.papersynth.PlaybackEngine.stop
+import com.example.papersynth.jni.PlaybackEngine.create
+import com.example.papersynth.jni.PlaybackEngine.delete
+import com.example.papersynth.jni.PlaybackEngine.setChannelCount
+import com.example.papersynth.jni.PlaybackEngine.start
+import com.example.papersynth.jni.PlaybackEngine.stop
 import com.example.papersynth.R
-import com.example.papersynth.dataclasses.FourierSeries
-import com.example.papersynth.dataclasses.PixelsArray
 import com.example.papersynth.enums.MusicalScale
 import com.example.papersynth.fragments.CanvasFragment
 import com.example.papersynth.fragments.ScalesDialog
-import com.example.papersynth.utils.CurveFittingUtil
 import com.example.papersynth.utils.FileUtil
 import com.example.papersynth.viewmodels.ScaleViewModel
-import kotlin.math.PI
 
 private const val NUM_SAMPLES = 256
-private const val HALF_WAVE_CYCLE = NUM_SAMPLES / (2 * PI.toFloat())
 
 class MainActivity : AppCompatActivity(), View.OnClickListener, ScalesDialog.ScalesDialogListener {
 
-    private lateinit var fourierSeries: ArrayList<FourierSeries>
+    private lateinit var waveForms: ArrayList<FloatArray>
 
     private val scaleViewModel: ScaleViewModel by viewModels()
     private var selectedScale = MusicalScale.CHROMATIC
@@ -128,7 +122,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, ScalesDialog.Sca
     }
 
     private fun createAndStartEngine() {
-        create(this, fourierSeries, selectedScale, canvasHeight)
+        create(this, waveForms, selectedScale, canvasHeight)
         setChannelCount(2) // stereo
         val result = start()
         if (result != 0) {
@@ -146,21 +140,17 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, ScalesDialog.Sca
 
     private fun applyWave() {
         // TODO: save coefficients in json
-        fourierSeries = ArrayList()
+        waveForms = ArrayList()
         val oscs = FileUtil.readOscillatorFromFile(this as Activity, "my_oscillators.json")
         if (oscs == null) {
             val oscDataNew = FloatArray(NUM_SAMPLES)
-            for (i in 0 until NUM_SAMPLES) {
-                oscDataNew[i] = CurveFittingUtil.calculateSineSample(i, b = HALF_WAVE_CYCLE)
-            }
-            val series = CurveFittingUtil.fit(oscDataNew, NUM_SAMPLES)
             for (i in 0 until 3) {
-                fourierSeries.add(series)
+                waveForms.add(oscDataNew)
             }
         } else {
             for (osc in oscs) {
                 osc.oscillator_data?.let {
-                    fourierSeries.add(CurveFittingUtil.fit(it, NUM_SAMPLES))
+                    waveForms.add(it)
                 }
             }
         }

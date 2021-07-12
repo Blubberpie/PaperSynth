@@ -7,28 +7,27 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.FragmentActivity
 import com.example.papersynth.R
-import com.example.papersynth.dataclasses.FourierSeries
 import com.example.papersynth.dataclasses.TextToDraw
-import com.example.papersynth.utils.CurveFittingUtil
-import com.example.papersynth.utils.CurveFittingUtil.calculateSineSample
+import com.example.papersynth.jni.FFT
+import com.example.papersynth.utils.MathUtil.calculateSineSample
 import com.example.papersynth.utils.FileUtil
-import org.jetbrains.kotlinx.multik.ndarray.data.D1
-import org.jetbrains.kotlinx.multik.ndarray.data.NDArray
-import org.jetbrains.kotlinx.multik.ndarray.operations.forEachIndexed
 import java.io.FileNotFoundException
 import kotlin.math.PI
 import kotlin.math.roundToInt
+import kotlin.system.measureNanoTime
 
 private const val NUM_SAMPLES = 256
 private const val HALF_WAVE_CYCLE = NUM_SAMPLES / (2 * PI.toFloat())
 private const val CANVAS_PADDING = 15f
 private const val GRID_STROKE_WIDTH = 1f
 private const val GRID_STROKE_ACCENT_WIDTH = 3f
+private const val OVERSAMPLE_FACTOR = 2
 
 class OscillatorCanvasView : View {
 
@@ -40,8 +39,7 @@ class OscillatorCanvasView : View {
 
     private lateinit var mainCanvas: Canvas
     private lateinit var mainBitmap: Bitmap
-    private lateinit var currentFourierSeries: FourierSeries
-    private lateinit var calculatedFourierYs: NDArray<Float, D1>
+    private lateinit var oversampledWave: FloatArray
 
     // Dot-related
 
@@ -81,11 +79,7 @@ class OscillatorCanvasView : View {
         textSize = 50f
     }
 
-    private val numStepsFourier = NUM_SAMPLES * 2
-    private val stepSizeFourier = 1f / numStepsFourier
-    private val arrXsFourier: NDArray<Float, D1> = CurveFittingUtil.generateXs(stepSizeFourier)
     private var fourierSampleSpreadAmount = 0f
-    private var firstTime = true
 
     private val fourierPath = Path()
     private val gridLines = Path()
@@ -130,8 +124,9 @@ class OscillatorCanvasView : View {
         canvasHalfHeight = canvasHeight / 2
         dotSpreadAmount = canvasWidth / 256
         gridSpreadAmount = canvasWidth / numGridSpaces
-        fourierSampleSpreadAmount = canvasWidth / numStepsFourier
+        fourierSampleSpreadAmount = canvasWidth / (NUM_SAMPLES * OVERSAMPLE_FACTOR)
         generateGridLines()
+        oversampleCurrentWave()
 
         mainBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         mainCanvas = Canvas(mainBitmap)
@@ -139,10 +134,6 @@ class OscillatorCanvasView : View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (firstTime) { // workaround
-            handleFourierComputations()
-            firstTime = false
-        }
         drawCanvasGrid(canvas)
         drawDotSamples(canvas)
         drawFourierSeries(canvas)
@@ -166,18 +157,21 @@ class OscillatorCanvasView : View {
     private fun touchAndMove() {
         setNewSampleListValue()
         invalidate()
+        oversampleCurrentWave()
     }
 
     private fun touchUp() {
-        handleFourierComputations()
+        oversampleCurrentWave()
     }
 
     // CALCULATIONS //
 
-    private fun handleFourierComputations() {
-        setFourierSeries(computeCurve(currentWave))
-        generateYs()
+    private fun oversampleCurrentWave(timed: Boolean=false) {
+        val timeTaken = measureNanoTime {
+            oversampledWave = FFT.oversample(waveList[currentWave.ordinal], OVERSAMPLE_FACTOR)
+        }
         generateFourierPath()
+        if (timed) Log.d("Execution Time", "Oversampling computation time taken: $timeTaken nanoseconds")
     }
 
     private fun initializeSineWave() {
@@ -186,22 +180,13 @@ class OscillatorCanvasView : View {
         }
     }
 
-    private fun generateYs() {
-        calculatedFourierYs = CurveFittingUtil.initializeFourierYs(numStepsFourier, currentFourierSeries.a0)
-        calculatedFourierYs = CurveFittingUtil.calculateValuesByCoefficients(
-            currentFourierSeries,
-            arrXsFourier,
-            calculatedFourierYs
-        )
-    }
-
     private fun generateFourierPath() {
         var lastXPos = CANVAS_PADDING
         var lastYPos = CANVAS_PADDING
 
         fourierPath.reset()
 
-        calculatedFourierYs.forEachIndexed { i: Int, sample: Float ->
+        oversampledWave.forEachIndexed { i: Int, sample: Float ->
             val xPos = (i * fourierSampleSpreadAmount) + CANVAS_PADDING
             val yPos = (canvasHalfHeight * (1 - sample)) + CANVAS_PADDING
 
@@ -214,10 +199,6 @@ class OscillatorCanvasView : View {
             lastXPos = xPos
             lastYPos = yPos
         }
-    }
-
-    private fun computeCurve(wave: WaveEnum): FourierSeries {
-        return CurveFittingUtil.fit(waveList[wave.ordinal], NUM_SAMPLES)
     }
 
     // Drawing //
@@ -304,10 +285,6 @@ class OscillatorCanvasView : View {
         waveList[currentWave.ordinal][samplePos] = sampleVal
     }
 
-    private fun setFourierSeries(fourierSeries: FourierSeries) {
-        currentFourierSeries = fourierSeries
-    }
-
     //// Public ////
 
     fun getWaves(): ArrayList<FloatArray> {
@@ -316,13 +293,13 @@ class OscillatorCanvasView : View {
 
     fun resetOscillator() {
         initializeSineWave()
-        handleFourierComputations()
+        oversampleCurrentWave()
         invalidate()
     }
 
     fun setCurrentWave(wave: WaveEnum) {
         currentWave = wave
-        handleFourierComputations()
+        oversampleCurrentWave()
         invalidate()
     }
 }

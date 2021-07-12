@@ -6,6 +6,7 @@
 //
 
 #include "FFTUtil.h"
+#include <logging_macros.h>
 
 void FFTUtil::FFT(const float *in, float *out, int len, bool inverse) {
     PFFFT_Setup *setup = pffft_new_setup(len, PFFFT_REAL);

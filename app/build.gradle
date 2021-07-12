@@ -72,8 +72,6 @@ dependencies {
     implementation "androidx.fragment:fragment-ktx:$fragment_version"
 
     implementation("com.android.support:multidex:1.0.3") // required for apps with a lot of methods
-    implementation "org.jetbrains.kotlinx:multik-api:0.0.1"
-    implementation "org.jetbrains.kotlinx:multik-default:0.0.1"
     implementation "com.thebluealliance:spectrum:0.7.1"
 
     testImplementation 'junit:junit:4.13.2' // 4.+

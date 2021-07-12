@@ -9,11 +9,9 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.res.ResourcesCompat
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModelProvider
-import com.example.papersynth.PlaybackEngine
+import com.example.papersynth.jni.PlaybackEngine
 import com.example.papersynth.R
 import com.example.papersynth.enums.MusicalScale
 import com.example.papersynth.utils.FileUtil.readCanvasFromPath

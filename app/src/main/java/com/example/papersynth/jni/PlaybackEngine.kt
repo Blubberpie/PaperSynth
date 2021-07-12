@@ -1,18 +1,16 @@
-package com.example.papersynth
+package com.example.papersynth.jni
 
 import android.content.Context
 import android.media.AudioManager
 import android.os.Build
 import com.example.papersynth.dataclasses.PixelsArray
-import com.example.papersynth.dataclasses.FourierSeries
 import com.example.papersynth.enums.MusicalScale
-import org.jetbrains.kotlinx.multik.ndarray.operations.toList
 
 object PlaybackEngine {
     private var mEngineHandle: Long = 0
     fun create(
         context: Context,
-        fourierSeries: ArrayList<FourierSeries>,
+        waveForms: ArrayList<FloatArray>,
         scale: MusicalScale,
         canvasHeight: Int
     ): Boolean {
@@ -20,18 +18,9 @@ object PlaybackEngine {
             setDefaultStreamValues(context)
             // TODO: Pressed for time. VERY BAD CODE LOL
             mEngineHandle = nativeCreateEngine(
-                fourierSeries[0].coefficientsA.toList().toFloatArray(),
-                fourierSeries[0].coefficientsB.toList().toFloatArray(),
-                fourierSeries[0].numTerms,
-                fourierSeries[0].a0,
-                fourierSeries[1].coefficientsA.toList().toFloatArray(),
-                fourierSeries[1].coefficientsB.toList().toFloatArray(),
-                fourierSeries[1].numTerms,
-                fourierSeries[1].a0,
-                fourierSeries[2].coefficientsA.toList().toFloatArray(),
-                fourierSeries[2].coefficientsB.toList().toFloatArray(),
-                fourierSeries[2].numTerms,
-                fourierSeries[2].a0,
+                waveForms[0],
+                waveForms[1],
+                waveForms[2],
                 scale.ordinal,
                 canvasHeight
             )
@@ -110,18 +99,9 @@ object PlaybackEngine {
 
     // Native methods
     private external fun nativeCreateEngine(
-        coefficientsA1: FloatArray,
-        coefficientsB1: FloatArray,
-        numTerms1: Int,
-        a01: Float,
-        coefficientsA2: FloatArray,
-        coefficientsB2: FloatArray,
-        numTerms2: Int,
-        a02: Float,
-        coefficientsA3: FloatArray,
-        coefficientsB3: FloatArray,
-        numTerms3: Int,
-        a03: Float,
+        wave1: FloatArray,
+        wave2: FloatArray,
+        wave3: FloatArray,
         scaleOrdinal: Int,
         canvasHeight: Int
     ): Long

@@ -301,7 +301,7 @@ class CanvasView : View {
 
     fun setStrokeWidth(thickness: Int) {
         when (thickness) {
-            1 -> brush.strokeWidth = STROKE_WIDTH * 1.5f
+            1 -> brush.strokeWidth = STROKE_WIDTH * 1.8f
             2 -> brush.strokeWidth = STROKE_WIDTH * 2f
             3 -> brush.strokeWidth = STROKE_WIDTH * 2.5f
             else -> brush.strokeWidth = STROKE_WIDTH
