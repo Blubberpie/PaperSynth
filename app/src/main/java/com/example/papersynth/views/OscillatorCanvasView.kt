@@ -135,8 +135,8 @@ class OscillatorCanvasView : View {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         drawCanvasGrid(canvas)
-        drawDotSamples(canvas)
         drawFourierSeries(canvas)
+        drawDotSamples(canvas)
     }
 
     @SuppressLint("ClickableViewAccessibility")
